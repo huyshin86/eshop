@@ -3,7 +3,8 @@ package com.example.eshop.controller;
 import java.util.List;
 
 import com.example.eshop.exception.UserNotFoundException;
-import com.example.eshop.model.dto.business.response.UserOrderResponseDto;
+import com.example.eshop.model.Product;
+import com.example.eshop.model.dto.business.*;
 import com.example.eshop.model.dto.common.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,9 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.eshop.model.Order;
 import com.example.eshop.model.OrderItem;
 import com.example.eshop.model.User;
-import com.example.eshop.model.dto.business.response.OrderItemResponseDto;
-import com.example.eshop.model.dto.business.response.OrderResponseDto;
-import com.example.eshop.model.dto.business.response.UserInfoResponseDto;
 import com.example.eshop.repository.interfaces.UserRepository;
 import com.example.eshop.security.util.CheckResourceOwnership;
 import com.example.eshop.security.util.SecurityUtils;
@@ -64,8 +62,8 @@ public class UserDetailController {
         );
     }
 
-    private UserInfoResponseDto mapToUserInfoResponseDto(User user) {
-        return new UserInfoResponseDto(
+    private UserInfoDto mapToUserInfoResponseDto(User user) {
+        return new UserInfoDto(
                 user.getEmail(),
                 user.getFirstName(),
                 user.getLastName(),
@@ -73,11 +71,11 @@ public class UserDetailController {
                 user.getAddress());
     }
 
-    private UserOrderResponseDto maptoUserOrderResponseDto(User user){
-        return new UserOrderResponseDto(mapOrders(user.getOrders()));
+    private UserOrderDto maptoUserOrderResponseDto(User user){
+        return new UserOrderDto(mapOrders(user.getOrders()));
     }
 
-    private List<OrderResponseDto> mapOrders(List<Order> orders) {
+    private List<OrderDto> mapOrders(List<Order> orders) {
         if (orders == null) {
             return List.of();
         }
@@ -86,11 +84,11 @@ public class UserDetailController {
             .toList();
     }
 
-    private OrderResponseDto toOrderResponseDto(Order order) {
+    private OrderDto toOrderResponseDto(Order order) {
         if (order == null) {
             return null;
         }
-        return new OrderResponseDto(
+        return new OrderDto(
             order.getOrderId(),
             order.getOrderNumber(),
             order.getOrderDate(),
@@ -104,7 +102,7 @@ public class UserDetailController {
             mapOrderItems(order.getOrderItems())
         );
     }
-    private List<OrderItemResponseDto> mapOrderItems(List<OrderItem> items) {
+    private List<OrderItemDto> mapOrderItems(List<OrderItem> items) {
         if (items == null) {
             return List.of();
         }
@@ -113,14 +111,24 @@ public class UserDetailController {
             .toList();
     }
 
-    private OrderItemResponseDto toOrderItemResponseDto(OrderItem item) {
-        return new OrderItemResponseDto(
+    private OrderItemDto toOrderItemResponseDto(OrderItem item) {
+        return new OrderItemDto(
             item.getOrderItemId(),
-            item.getProduct().getProductId(),
-            item.getProduct().getProductName(),
+            toProductDto(item.getProduct()),
             item.getQuantity(),
             item.getUnitPrice(),
             item.getTotal()
+        );
+    }
+    private ProductDto toProductDto(Product product){
+        return new ProductDto(
+                product.getProductId(),
+                product.getProductName(),
+                null,
+                null,
+                product.getImageUrl(),
+                null,
+                null
         );
     }
 }

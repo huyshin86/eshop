@@ -1,9 +1,10 @@
-package com.example.eshop.model.dto.auth.request;
+package com.example.eshop.model.dto.auth;
 
+import com.example.eshop.model.dto.common.PasswordFields;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 
-public record RegisterDto(
+public record RegisterRequest(
         @NotBlank(message = "Email is required")
         @Email(message = "Invalid email format")
         String email,

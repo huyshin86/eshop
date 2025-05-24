@@ -1,10 +1,10 @@
-package com.example.eshop.model.dto.business.response;
+package com.example.eshop.model.dto.business;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record OrderResponseDto(
+public record OrderDto(
     Long orderId,
     String orderNumber,
     LocalDateTime orderDate,
@@ -15,5 +15,6 @@ public record OrderResponseDto(
     BigDecimal tax,
     BigDecimal grandTotal,
     String shippingAddress,
-    List<OrderItemResponseDto> items
-) {}
+    List<OrderItemDto> items
+) {
+}

@@ -1,8 +1,8 @@
-package com.example.eshop.model.dto.auth.request;
+package com.example.eshop.model.dto.auth;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
-public record AuthDto(
+public record AuthRequest(
         @NotBlank(message = "Email is required")
         @Email(message = "Invalid email format")
         String email, 

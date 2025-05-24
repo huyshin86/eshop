@@ -1,8 +1,8 @@
 package com.example.eshop.controller;
 
 import com.example.eshop.model.User;
-import com.example.eshop.model.dto.auth.request.AuthDto;
-import com.example.eshop.model.dto.auth.request.RegisterDto;
+import com.example.eshop.model.dto.auth.AuthRequest;
+import com.example.eshop.model.dto.auth.RegisterRequest;
 import com.example.eshop.model.dto.common.SuccessResponse;
 import com.example.eshop.service.RegisterService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,7 +34,7 @@ public class AuthController {
     private final RegisterService registerService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody AuthDto loginRequest, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthRequest loginRequest, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = authenticateUserAndCreateSession(
                 loginRequest.email(), loginRequest.password(), request);
 
@@ -42,7 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/customer")
-    public ResponseEntity<?> registerCustomer(@Valid @RequestBody RegisterDto registerRequest, HttpServletRequest request, HttpServletResponse response){
+    public ResponseEntity<?> registerCustomer(@Valid @RequestBody RegisterRequest registerRequest, HttpServletRequest request, HttpServletResponse response){
         User user = registerService.registerCustomer(registerRequest);
 
         // Authenticate and set ownership

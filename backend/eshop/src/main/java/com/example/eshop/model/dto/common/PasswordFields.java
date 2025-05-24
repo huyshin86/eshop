@@ -1,4 +1,4 @@
-package com.example.eshop.model.dto.auth.request;
+package com.example.eshop.model.dto.common;
 
 import com.example.eshop.security.validation.PasswordMatches;
 import jakarta.validation.constraints.NotBlank;

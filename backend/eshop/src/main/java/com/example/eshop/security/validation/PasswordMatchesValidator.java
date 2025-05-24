@@ -1,6 +1,6 @@
 package com.example.eshop.security.validation;
 
-import com.example.eshop.model.dto.auth.request.PasswordFields; // Import the new base DTO
+import com.example.eshop.model.dto.common.PasswordFields; // Import the new base DTO
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
