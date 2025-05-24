@@ -34,8 +34,7 @@ public class AuthController {
     private final RegisterService registerService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody AuthDto loginRequest, HttpServletRequest request,
-                                   HttpServletResponse response) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthDto loginRequest, HttpServletRequest request, HttpServletResponse response) {
         Authentication authentication = authenticateUserAndCreateSession(
                 loginRequest.email(), loginRequest.password(), request);
 
@@ -43,8 +42,7 @@ public class AuthController {
     }
 
     @PostMapping("/register/customer")
-    public ResponseEntity<?> registerCustomer(@Valid @RequestBody RegisterDto registerRequest, HttpServletRequest request,
-                                      HttpServletResponse response){
+    public ResponseEntity<?> registerCustomer(@Valid @RequestBody RegisterDto registerRequest, HttpServletRequest request, HttpServletResponse response){
         User user = registerService.registerCustomer(registerRequest);
 
         // Authenticate and set ownership

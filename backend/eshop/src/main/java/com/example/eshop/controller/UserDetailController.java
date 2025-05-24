@@ -47,7 +47,7 @@ public class UserDetailController {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(
-                new SuccessResponse<UserInfoResponseDto>(mapToUserInfoResponseDto(user))
+                new SuccessResponse<>(mapToUserInfoResponseDto(user))
         );
     }
 
@@ -60,7 +60,7 @@ public class UserDetailController {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(
-                new SuccessResponse<UserOrderResponseDto>(maptoUserOrderResponseDto(user))
+                new SuccessResponse<>(maptoUserOrderResponseDto(user))
         );
     }
 
