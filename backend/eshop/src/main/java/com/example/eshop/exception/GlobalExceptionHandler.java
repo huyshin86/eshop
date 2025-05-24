@@ -1,5 +1,6 @@
 package com.example.eshop.exception;
 
+import com.example.eshop.model.dto.common.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,11 +21,12 @@ import jakarta.validation.ConstraintViolationException;
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
+    // Custom error response for mismatch constraint in request dto
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
         logger.error("Validation error occurred: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
 
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName;
@@ -46,7 +48,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConstraintViolation(
             ConstraintViolationException ex, HttpServletRequest request) {
         logger.error("Constraint violation occurred: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
 
         ex.getConstraintViolations().forEach(violation -> {
             String fieldName = violation.getPropertyPath().toString();
@@ -55,14 +57,15 @@ public class GlobalExceptionHandler {
             response.addError(fieldName, message);
         });
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
+    // Custom error message for invalid format in request body
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMessageNotReadable(
             HttpMessageNotReadableException ex, HttpServletRequest request) {
         logger.error("Message not readable: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
         response.addError("message", "Invalid request body format");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -71,7 +74,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
         logger.error("Authentication failed: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.UNAUTHORIZED ,request.getRequestURI());
         response.addError("auth", "Invalid credentials");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
@@ -79,7 +82,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
         logger.error("Response status exception: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse((HttpStatus) ex.getStatusCode(),request.getRequestURI());
         response.addError("status", ex.getReason());
         return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
@@ -88,25 +91,34 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAllExceptions(
             Exception ex, HttpServletRequest request) {
         logger.error("Unexpected error occurred: ", ex);
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR ,request.getRequestURI());
         response.addError("error", "An unexpected error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    // Custom error response for user not found
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerUserNotFound(UserNotFoundException ex, HttpServletRequest request){
+        logger.error("User not found: {}", ex.getId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     // Custom error response for email already in use
     @ExceptionHandler(EmailAlreadyInUseException.class)
     public ResponseEntity<ErrorResponse> handlerEmailAlreadyInUse(EmailAlreadyInUseException ex, HttpServletRequest request){
         logger.error("Email already in use: {}", ex.getEmail());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // Custom error response for password mismatch
+    // Custom error response for password mismatch in update new password
     @ExceptionHandler(PasswordMismatchException.class)
     public ResponseEntity<ErrorResponse> handlePasswordMismatch(PasswordMismatchException ex, HttpServletRequest request) {
         logger.error("Password validation failed: {}", ex.getMessage());
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
         response.addError("password", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
@@ -116,23 +128,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResourceOwnership(ResourceOwnershipException ex, HttpServletRequest request) {
         logger.error("Resource ownership violation: User {} attempted to access resource {}", 
                     ex.getUserId(), ex.getResourceId());
-        
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         
-        return ResponseEntity
-            .status(HttpStatus.FORBIDDEN)
-            .body(response);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 
     // Custom error response for access denied
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDeniedException(AccessDeniedException ex, HttpServletRequest request) {
-        ErrorResponse response = new ErrorResponse(request.getRequestURI());
+        ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN ,request.getRequestURI());
         response.addError("message", ex.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
-                .body(response);
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
     }
 }

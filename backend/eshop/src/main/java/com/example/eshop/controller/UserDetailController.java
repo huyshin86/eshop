@@ -2,7 +2,9 @@ package com.example.eshop.controller;
 
 import java.util.List;
 
+import com.example.eshop.exception.UserNotFoundException;
 import com.example.eshop.model.dto.business.response.UserOrderResponseDto;
+import com.example.eshop.model.dto.common.SuccessResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,10 +44,11 @@ public class UserDetailController {
         Long userId = SecurityUtils.getCurrentUserId();
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(
-                mapToUserInfoResponseDto(user));
+                new SuccessResponse<UserInfoResponseDto>(mapToUserInfoResponseDto(user))
+        );
     }
 
     @GetMapping("/me/orders")
@@ -54,10 +57,10 @@ public class UserDetailController {
         Long userId = SecurityUtils.getCurrentUserId();
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(
-                maptoUserOrderResponseDto(user)
+                new SuccessResponse<UserOrderResponseDto>(maptoUserOrderResponseDto(user))
         );
     }
 

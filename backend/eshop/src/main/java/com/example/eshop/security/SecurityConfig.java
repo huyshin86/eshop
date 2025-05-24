@@ -42,7 +42,8 @@ public class SecurityConfig {
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests((authz) -> authz
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "ADMIN", "STORE")
+                        .requestMatchers("/api/products/**").permitAll()
+                        .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
@@ -96,17 +97,6 @@ public class SecurityConfig {
     @Bean
     public HttpSessionSecurityContextRepository httpSessionSecurityContextRepository() {
         return new HttpSessionSecurityContextRepository();
-    }
-
-    @Bean
-    public CookieSerializer cookieSerializer() {
-        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setCookieName("SESSION");
-        serializer.setCookieMaxAge(86400); // 1 day
-        serializer.setCookiePath("/");
-        serializer.setUseSecureCookie(false); // For HTTPS
-        serializer.setSameSite("Lax");
-        return serializer;
     }
 
     @Bean
