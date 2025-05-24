@@ -44,7 +44,7 @@ public class Category {
     private String description;
 
     @Column(name = "image_url", length = 255)
-    private String imageUrl;
+    private String categoryIconUrl;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
