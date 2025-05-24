@@ -58,7 +58,7 @@ public class UserDetailController {
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(
-                new SuccessResponse<>(maptoUserOrderResponseDto(user))
+                new SuccessResponse<>(mapToUserOrderResponseDto(user))
         );
     }
 
@@ -71,7 +71,7 @@ public class UserDetailController {
                 user.getAddress());
     }
 
-    private UserOrderDto maptoUserOrderResponseDto(User user){
+    private UserOrderDto mapToUserOrderResponseDto(User user){
         return new UserOrderDto(mapOrders(user.getOrders()));
     }
 
