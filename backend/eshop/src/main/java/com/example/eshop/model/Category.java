@@ -43,7 +43,7 @@ public class Category {
     @Lob // For TEXT type
     private String description;
 
-    @Column(name = "image_url", length = 255)
+    @Column(name = "image_url")
     private String categoryIconUrl;
 
     @CreationTimestamp
