@@ -56,8 +56,4 @@ public class OrderItem {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
 }

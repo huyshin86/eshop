@@ -6,6 +6,7 @@ import com.example.eshop.exception.UserNotFoundException;
 import com.example.eshop.model.Product;
 import com.example.eshop.model.dto.business.*;
 import com.example.eshop.model.dto.common.SuccessResponse;
+import com.example.eshop.repository.interfaces.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.eshop.model.Order;
 import com.example.eshop.model.OrderItem;
 import com.example.eshop.model.User;
-import com.example.eshop.repository.interfaces.UserRepository;
 import com.example.eshop.security.util.CheckResourceOwnership;
 import com.example.eshop.security.util.SecurityUtils;
 
