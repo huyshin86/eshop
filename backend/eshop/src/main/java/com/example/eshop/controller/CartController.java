@@ -8,7 +8,7 @@ import com.example.eshop.model.dto.business.ProductDto;
 import com.example.eshop.model.dto.business.UserCartDto;
 import com.example.eshop.model.dto.business.CartItemDto;
 import com.example.eshop.model.dto.common.SuccessResponse;
-import com.example.eshop.repository.interfaces.UserRepository;
+import com.example.eshop.repository.interfaces.UserJpaRepository;
 import com.example.eshop.security.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +23,13 @@ import java.util.List;
 @RequestMapping("/api/cart")
 @RequiredArgsConstructor
 public class CartController {
-    private final UserRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
 
     @GetMapping
     public ResponseEntity<?> getUserCart(){
         Long userId = SecurityUtils.getCurrentUserId();
 
-        User user = userRepository.findById(userId)
+        User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         UserCartDto userCartDto = mapToUserCartResponseDto(user);

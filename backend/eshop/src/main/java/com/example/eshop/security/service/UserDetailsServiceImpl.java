@@ -1,7 +1,7 @@
 package com.example.eshop.security.service;
 
 import com.example.eshop.model.User;
-import com.example.eshop.repository.interfaces.UserRepository;
+import com.example.eshop.repository.interfaces.UserJpaRepository;
 import com.example.eshop.security.util.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ import java.util.Collections;
 @Service
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private final UserRepository repo;
+    private final UserJpaRepository repo;
 
     @Override
     @Transactional(readOnly = true)

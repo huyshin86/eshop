@@ -6,7 +6,7 @@ import com.example.eshop.exception.UserNotFoundException;
 import com.example.eshop.model.Product;
 import com.example.eshop.model.dto.business.*;
 import com.example.eshop.model.dto.common.SuccessResponse;
-import com.example.eshop.repository.interfaces.UserRepository;
+import com.example.eshop.repository.interfaces.UserJpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
 public class UserDetailController {
-    private final UserRepository userRepository;
+    private final UserJpaRepository userJpaRepository;
 
     // This endpoint is for testing CheckResourceOwnership
     @GetMapping("/{id}/details")
@@ -41,7 +41,7 @@ public class UserDetailController {
     public ResponseEntity<?> getUserDetails() {
         Long userId = SecurityUtils.getCurrentUserId();
 
-        User user = userRepository.findById(userId)
+        User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(
@@ -54,7 +54,7 @@ public class UserDetailController {
     public ResponseEntity<?> getUserOrders() {
         Long userId = SecurityUtils.getCurrentUserId();
 
-        User user = userRepository.findById(userId)
+        User user = userJpaRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
 
         return ResponseEntity.ok(

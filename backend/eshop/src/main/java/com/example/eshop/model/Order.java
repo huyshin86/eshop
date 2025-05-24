@@ -67,7 +67,7 @@ public class Order {
     @Column(name = "grand_total", nullable = false, precision = 10, scale = 2)
     private BigDecimal grandTotal;
 
-    @Column(name = "shipping_address", nullable = false, length = 255)
+    @Column(name = "shipping_address", nullable = false)
     private String shippingAddress;
 
     @CreationTimestamp
