@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,8 +24,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final UserJpaRepository userJpaRepository;
-    private final ProductJpaRepository productJpaRepository;
+    private final UserJpaRepository userRepo;
+    private final ProductJpaRepository productRepo;
 
     public UserCartDto getUserCart(Long userId) {
         User user = findUserById(userId);
@@ -56,7 +57,7 @@ public class CartService {
                 }
         );
 
-        userJpaRepository.save(user);
+        userRepo.save(user);
     }
 
     public void updateCartItem(Long userId, Long productId, Integer quantity) {
@@ -69,7 +70,7 @@ public class CartService {
         validateStockAvailability(item.getProduct(), quantity);
 
         item.setQuantity(quantity);
-        userJpaRepository.save(user);
+        userRepo.save(user);
     }
 
     public void removeCartItem(Long userId, Long productId) {
@@ -83,25 +84,25 @@ public class CartService {
             throw new CartItemNotFoundException(userId, productId);
         }
 
-        userJpaRepository.save(user);
+        userRepo.save(user);
     }
 
     public void clearCart(Long userId) {
         User user = findUserById(userId);
         user.getCartItems().clear();
-        userJpaRepository.save(user);
+        userRepo.save(user);
     }
 
     // --- Private Helper Methods ---
 
     private User findUserById(Long userId) {
-        return userJpaRepository.findById(userId)
+        return userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
 
     private Product findProductById(Long productId) {
-        return productJpaRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException(productId));
+        return productRepo.findById(productId)
+                .orElseThrow(() -> new ProductNotFoundException(Collections.singletonList(productId)));
     }
 
     private void validateStockAvailability(Product product, Integer requestedQuantity) {

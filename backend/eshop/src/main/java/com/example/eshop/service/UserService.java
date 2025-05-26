@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserJpaRepository userJpaRepository;
+    private final UserJpaRepository userRepo;
 
     @Transactional(readOnly = true)
     public UserInfoDto getUserInfo(Long userId) {
@@ -38,7 +38,7 @@ public class UserService {
 
         updateUserFields(user, request);
 
-        User savedUser = userJpaRepository.save(user);
+        User savedUser = userRepo.save(user);
         return mapToUserInfoResponseDto(savedUser);
     }
 
@@ -89,7 +89,7 @@ public class UserService {
 
     // Helper methods
     private User findUserById(Long userId) {
-        return userJpaRepository.findById(userId)
+        return userRepo.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
     }
 

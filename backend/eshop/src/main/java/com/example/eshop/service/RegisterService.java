@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class RegisterService {
-    private final UserJpaRepository userJpaRepository;
+    private final UserJpaRepository userRepo;
     private final PasswordEncoder passwordEncoder;
 
     public User registerCustomer(RegisterRequest dto) {
@@ -20,7 +20,7 @@ public class RegisterService {
     }
 
     private User register(RegisterRequest dto){
-        if (userJpaRepository.existsByEmail(dto.email())) {
+        if (userRepo.existsByEmail(dto.email())) {
             throw new EmailAlreadyInUseException(dto.email());
         }
 
@@ -33,6 +33,6 @@ public class RegisterService {
                 dto.address(),
                 Role.CUSTOMER);
 
-        return userJpaRepository.save(user);
+        return userRepo.save(user);
     }
 }

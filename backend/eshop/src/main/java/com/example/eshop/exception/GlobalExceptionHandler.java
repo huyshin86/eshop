@@ -217,4 +217,40 @@ public class GlobalExceptionHandler {
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
+
+    // Custom error response for cart empty
+    @ExceptionHandler(CartEmptyException.class)
+    public ResponseEntity<ErrorResponse> handleCartEmptyException(CartEmptyException ex, HttpServletRequest request){
+        logger.error("Cart is empty for user {}", ex.getUserId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Custom error response for missing shipping address
+    @ExceptionHandler(ShippingAddressMissingException.class)
+    public ResponseEntity<ErrorResponse> handleShippingAddressMissingException(ShippingAddressMissingException ex, HttpServletRequest request){
+        logger.error("Shipping address is missing for user {}", ex.getUserId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Custom error response for too many request for product resources in checkout
+    @ExceptionHandler(ProductLockAcquisitionFailedException.class)
+    public ResponseEntity<ErrorResponse> handleProductLockAcquisitionFailedException(ProductLockAcquisitionFailedException ex, HttpServletRequest request){
+        logger.error("Could not acquire lock for products within 10 seconds for user {}", ex.getUserId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
+
+    // Custom error response for multiple fail checkouts
+    @ExceptionHandler(CheckoutFailException.class)
+    public ResponseEntity<ErrorResponse> handleCheckoutFailException(CheckoutFailException ex, HttpServletRequest request){
+        logger.error("Checkout failed after multiple attempts for user {} with error {}", ex.getUserId(), ex.getExceptionMessage());
+        ErrorResponse response = new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
 }
