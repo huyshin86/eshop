@@ -7,5 +7,4 @@ import com.example.eshop.model.Order;
 
 @Repository
 public interface OrderJpaRepository extends JpaRepository<Order, Long> {
-    
 }

@@ -9,6 +9,7 @@ import com.example.eshop.model.dto.common.SuccessResponse;
 import com.example.eshop.repository.interfaces.UserJpaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +23,7 @@ import com.example.eshop.security.util.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;
 
+@Validated
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor

@@ -1,9 +1,12 @@
 package com.example.eshop.security;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -28,6 +31,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
+    private static final DateTimeFormatter CUSTOM_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSS");
 
     public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
@@ -56,10 +60,15 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setContentType("application/json");
                             response.setStatus(401);
+                            String timestamp = LocalDateTime.now().format(CUSTOM_TIMESTAMP_FORMATTER);
+
+                            // Manually construct the JSON string to match your desired output
                             String errorMessage = String.format(
-                                    "{\"error\":\"%s\", \"path\":\"%s\", \"message\":\"Session validation failed\"}",
-                                    authException.getMessage(),
-                                    request.getRequestURI());
+                                    "{\"path\":\"%s\", \"timestamp\":\"%s\", \"status\":%d, \"errors\":{\"message\":\"%s\"}}",
+                                    request.getRequestURI(),
+                                    timestamp,
+                                    HttpStatus.UNAUTHORIZED.value(),
+                                    "Full authentication is required to access this resource. Session validation failed");
                             response.getWriter().write(errorMessage);
                         }))
                 .sessionManagement(session -> session

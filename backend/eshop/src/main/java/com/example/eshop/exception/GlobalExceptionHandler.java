@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.AuthenticationException;
@@ -20,8 +22,35 @@ import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    // Custom error response for missing required request parameters
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingServletRequestParameter(
+            MissingServletRequestParameterException ex, HttpServletRequest request) {
+        logger.error("Missing required request parameter: {}", ex.getParameterName());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        String errorMessage = String.format("Required parameter '%s' is missing", ex.getParameterName());
+        response.addError(ex.getParameterName(), errorMessage);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
 
-    // Custom error response for mismatch constraint in request dto
+    // Custom error response for type mismatch errors
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        logger.error("Method argument type mismatch: Parameter '{}' failed to convert value '{}' to type '{}'",
+                ex.getName(), ex.getValue(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "unknown");
+
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST, request.getRequestURI());
+        String errorMessage = String.format("Parameter '%s' has invalid format. Expected '%s'. Received '%s'.",
+                ex.getName(),
+                ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "a valid type",
+                ex.getValue());
+        response.addError("message", errorMessage);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Custom error response for mismatch constraint in request body
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex, HttpServletRequest request) {
@@ -43,7 +72,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // Custom error response for mismatch constraint in request dto
+    // Custom error response for mismatch constraint in request parameter, header, path variable
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolation(
             ConstraintViolationException ex, HttpServletRequest request) {
@@ -52,15 +81,17 @@ public class GlobalExceptionHandler {
 
         ex.getConstraintViolations().forEach(violation -> {
             String fieldName = violation.getPropertyPath().toString();
+            String[] parts = fieldName.split("\\.");
+            String field = parts[parts.length - 1];
             String message = violation.getMessage();
-            logger.debug("Path: {}, Message: {}", fieldName, message);
-            response.addError(fieldName, message);
+            logger.debug("Path: {}, Message: {}", field, message);
+            response.addError(field, message);
         });
 
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    // Custom error message for invalid format in request body
+    // Custom error response for invalid format in request body
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleMessageNotReadable(
             HttpMessageNotReadableException ex, HttpServletRequest request) {
@@ -75,7 +106,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex, HttpServletRequest request) {
         logger.error("Authentication failed: {}", ex.getMessage());
         ErrorResponse response = new ErrorResponse(HttpStatus.UNAUTHORIZED ,request.getRequestURI());
-        response.addError("auth", "Invalid credentials");
+        response.addError("message", "Invalid credentials");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
@@ -83,7 +114,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleResponseStatusException(ResponseStatusException ex, HttpServletRequest request) {
         logger.error("Response status exception: {}", ex.getMessage());
         ErrorResponse response = new ErrorResponse((HttpStatus) ex.getStatusCode(),request.getRequestURI());
-        response.addError("status", ex.getReason());
+        response.addError("message", ex.getReason());
         return ResponseEntity.status(ex.getStatusCode()).body(response);
     }
 
@@ -92,17 +123,17 @@ public class GlobalExceptionHandler {
             Exception ex, HttpServletRequest request) {
         logger.error("Unexpected error occurred: ", ex);
         ErrorResponse response = new ErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR ,request.getRequestURI());
-        response.addError("error", "An unexpected error occurred");
+        response.addError("message", "An unexpected error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 
     // Custom error response for user not found
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlerUserNotFound(UserNotFoundException ex, HttpServletRequest request){
-        logger.error("User not found: {}", ex.getId());
-        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        logger.error("User {} not found", ex.getId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
         response.addError("message", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
     // Custom error response for email already in use
@@ -119,7 +150,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handlePasswordMismatch(PasswordMismatchException ex, HttpServletRequest request) {
         logger.error("Password validation failed: {}", ex.getMessage());
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
-        response.addError("password", ex.getMessage());
+        response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
@@ -140,5 +171,23 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.FORBIDDEN ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
+    // Custom error response for product not found
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerProductNotFoundException(ProductNotFoundException ex, HttpServletRequest request){
+        logger.error("Product {} not found", ex.getProductId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    // Custom error response for cart item not found
+    @ExceptionHandler(CartItemNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlerCartItemNotFoundException(CartItemNotFoundException ex, HttpServletRequest request){
+        logger.error("Product {} not found in user {}'s cart", ex.getProductId(), ex.getUserId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 }
