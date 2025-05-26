@@ -1,18 +1,10 @@
-package com.example.eshop.model.dto.auth;
+package com.example.eshop.model.dto.business;
 
-import com.example.eshop.model.dto.common.PasswordFields;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
-public record RegisterRequest(
-        @NotBlank(message = "Email is required")
-        @Email(message = "Invalid email format")
-        String email,
-
-        @NotNull(message = "Password fields are required")
-        @Valid
-        PasswordFields passwordFields,
-
+public record UpdateUserInfoRequest(
         @NotBlank(message = "First name is required")
         @Size(min = 2, message = "First name must be at least 2 characters long")
         String firstName,
@@ -23,8 +15,9 @@ public record RegisterRequest(
 
         @NotBlank(message = "Phone is required")
         @Pattern(regexp = "\\d{10,15}", message = "Phone number must be between 10 and 15 digits")
-        String phone,
+        String phoneNumber,
 
         @NotBlank(message = "Address is required")
-        String address) {
+        String address
+) {
 }

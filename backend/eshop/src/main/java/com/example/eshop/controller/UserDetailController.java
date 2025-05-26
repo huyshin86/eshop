@@ -2,23 +2,18 @@ package com.example.eshop.controller;
 
 import java.util.List;
 
-import com.example.eshop.exception.UserNotFoundException;
-import com.example.eshop.model.Product;
 import com.example.eshop.model.dto.business.*;
 import com.example.eshop.model.dto.common.SuccessResponse;
-import com.example.eshop.repository.interfaces.UserJpaRepository;
+import com.example.eshop.service.UserService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.example.eshop.model.Order;
-import com.example.eshop.model.OrderItem;
-import com.example.eshop.model.User;
-import com.example.eshop.security.util.CheckResourceOwnership;
+import org.springframework.web.bind.annotation.*;
 import com.example.eshop.security.util.SecurityUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -27,27 +22,20 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
-public class UserDetailController {
-    private final UserJpaRepository userJpaRepository;
 
-    // This endpoint is for testing CheckResourceOwnership
-    @GetMapping("/{id}/details")
-    @PreAuthorize("hasRole('ADMIN')")
-    @CheckResourceOwnership
-    public String getUserDetails(@PathVariable Long id) {
-        return "User details";
-    }
+public class UserDetailController {
+
+    private final UserService userService;
 
     @GetMapping("/me/details")
     @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
     public ResponseEntity<?> getUserDetails() {
         Long userId = SecurityUtils.getCurrentUserId();
 
-        User user = userJpaRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        UserInfoDto userInfo = userService.getUserInfo(userId);
 
         return ResponseEntity.ok(
-                new SuccessResponse<>(mapToUserInfoResponseDto(user))
+                new SuccessResponse<>(userInfo)
         );
     }
 
@@ -56,81 +44,52 @@ public class UserDetailController {
     public ResponseEntity<?> getUserOrders() {
         Long userId = SecurityUtils.getCurrentUserId();
 
-        User user = userJpaRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+        UserOrderDto userOrders = userService.getUserOrders(userId);
 
         return ResponseEntity.ok(
-                new SuccessResponse<>(mapToUserOrderResponseDto(user))
+                new SuccessResponse<>(userOrders)
         );
     }
 
-    private UserInfoDto mapToUserInfoResponseDto(User user) {
-        return new UserInfoDto(
-                user.getEmail(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhoneNumber(),
-                user.getAddress());
-    }
+    @GetMapping("/me/orders/{orderId}")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> getOrderDetails(
+            @PathVariable
+            @NotNull(message = "Product ID is required")
+            @Positive(message = "Product ID must be positive") Long orderId
+    ) {
+        Long userId = SecurityUtils.getCurrentUserId();
 
-    private UserOrderDto mapToUserOrderResponseDto(User user){
-        return new UserOrderDto(mapOrders(user.getOrders()));
-    }
+        OrderDto order = userService.getOrderById(userId, orderId);
 
-    private List<OrderDto> mapOrders(List<Order> orders) {
-        if (orders == null) {
-            return List.of();
-        }
-        return orders.stream()
-            .map(this::toOrderResponseDto)
-            .toList();
-    }
-
-    private OrderDto toOrderResponseDto(Order order) {
-        if (order == null) {
-            return null;
-        }
-        return new OrderDto(
-            order.getOrderId(),
-            order.getOrderNumber(),
-            order.getOrderDate(),
-            order.getOrderStatus().toString(),
-            order.getSubtotal(),
-            order.getDiscountAmount(),
-            order.getShippingCost(),
-            order.getTax(),
-            order.getGrandTotal(),
-            order.getShippingAddress(),
-            mapOrderItems(order.getOrderItems())
+        return ResponseEntity.ok(
+                new SuccessResponse<>(order)
         );
     }
-    private List<OrderItemDto> mapOrderItems(List<OrderItem> items) {
-        if (items == null) {
-            return List.of();
-        }
-        return items.stream()
-            .map(this::toOrderItemResponseDto)
-            .toList();
-    }
 
-    private OrderItemDto toOrderItemResponseDto(OrderItem item) {
-        return new OrderItemDto(
-            item.getOrderItemId(),
-            toProductDto(item.getProduct()),
-            item.getQuantity(),
-            item.getUnitPrice(),
-            item.getTotal()
+    @GetMapping("/me/orders/status")
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<?> getOrdersByStatus(
+            @RequestParam
+            @NotBlank(message = "Status is required") String status) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        List<OrderDto> orders = userService.getOrdersByStatus(userId, status);
+
+        return ResponseEntity.ok(
+                new SuccessResponse<>(orders)
         );
     }
-    private ProductDto toProductDto(Product product){
-        return new ProductDto(
-                product.getProductId(),
-                product.getProductName(),
-                null,
-                null,
-                product.getImageUrl(),
-                null,
-                null
+
+    @PutMapping("/me/details")
+    @PreAuthorize("hasAnyRole('CUSTOMER', 'ADMIN')")
+    public ResponseEntity<?> updateUserDetails(@Valid @RequestBody UpdateUserInfoRequest request) {
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        UserInfoDto updatedUser = userService.updateUserInfo(userId, request);
+
+        return ResponseEntity.ok(
+                new SuccessResponse<>(HttpStatus.OK, "User information updated successfully")
         );
     }
 }

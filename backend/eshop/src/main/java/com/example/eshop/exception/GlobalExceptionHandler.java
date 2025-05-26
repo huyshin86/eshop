@@ -129,7 +129,7 @@ public class GlobalExceptionHandler {
 
     // Custom error response for user not found
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerUserNotFound(UserNotFoundException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request){
         logger.error("User {} not found", ex.getId());
         ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
         response.addError("message", ex.getMessage());
@@ -138,7 +138,7 @@ public class GlobalExceptionHandler {
 
     // Custom error response for email already in use
     @ExceptionHandler(EmailAlreadyInUseException.class)
-    public ResponseEntity<ErrorResponse> handlerEmailAlreadyInUse(EmailAlreadyInUseException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyInUse(EmailAlreadyInUseException ex, HttpServletRequest request){
         logger.error("Email already in use: {}", ex.getEmail());
         ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
         response.addError("message", ex.getMessage());
@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
 
     // Custom error response for product not found
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerProductNotFoundException(ProductNotFoundException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> handleProductNotFoundException(ProductNotFoundException ex, HttpServletRequest request){
         logger.error("Product {} not found", ex.getProductId());
         ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
         response.addError("message", ex.getMessage());
@@ -184,10 +184,37 @@ public class GlobalExceptionHandler {
 
     // Custom error response for cart item not found
     @ExceptionHandler(CartItemNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlerCartItemNotFoundException(CartItemNotFoundException ex, HttpServletRequest request){
+    public ResponseEntity<ErrorResponse> handleCartItemNotFoundException(CartItemNotFoundException ex, HttpServletRequest request){
         logger.error("Product {} not found in user {}'s cart", ex.getProductId(), ex.getUserId());
         ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    // Custom error response for order not found
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleOrderNotFoundException(OrderNotFoundException ex, HttpServletRequest request){
+        logger.error("Order {} not found in user {}'s cart", ex.getOrderId(), ex.getUserId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    // Custom error response for product not available
+    @ExceptionHandler(ProductNotAvailableException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotAvailableException(ProductNotAvailableException ex, HttpServletRequest request){
+        logger.error("Product {} not available", ex.getProductId());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    // Custom error response for insufficient product stock
+    @ExceptionHandler(InsufficientProductStockException.class)
+    public ResponseEntity<ErrorResponse> handleInsufficientProductStockException(InsufficientProductStockException ex, HttpServletRequest request){
+        logger.error("Product {} 's stock: {}", ex.getProductId(), ex.getStock());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }

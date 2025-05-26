@@ -21,7 +21,6 @@ public class RegisterService {
 
     private User register(RegisterRequest dto){
         if (userJpaRepository.existsByEmail(dto.email())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email is already in use");
             throw new EmailAlreadyInUseException(dto.email());
         }
 
@@ -31,7 +30,7 @@ public class RegisterService {
                 dto.firstName(),
                 dto.lastName(),
                 dto.phone(),
-                null,
+                dto.address(),
                 Role.CUSTOMER);
 
         return userJpaRepository.save(user);
