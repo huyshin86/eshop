@@ -1,4 +1,4 @@
-package com.example.eshop.security.validation;
+package com.example.eshop.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

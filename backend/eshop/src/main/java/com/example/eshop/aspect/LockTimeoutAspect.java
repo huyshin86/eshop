@@ -1,6 +1,6 @@
-package com.example.eshop.security.aspect;
+package com.example.eshop.aspect;
 
-import com.example.eshop.security.util.LockTimeout;
+import com.example.eshop.util.LockTimeout;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;

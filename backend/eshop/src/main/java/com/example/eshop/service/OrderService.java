@@ -8,7 +8,7 @@ import com.example.eshop.model.dto.business.ProductDto;
 import com.example.eshop.repository.interfaces.OrderJpaRepository;
 import com.example.eshop.repository.interfaces.ProductJpaRepository;
 import com.example.eshop.repository.interfaces.UserJpaRepository;
-import com.example.eshop.security.util.LockTimeout;
+import com.example.eshop.util.LockTimeout;
 import jakarta.persistence.PessimisticLockException;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.exception.LockAcquisitionException;

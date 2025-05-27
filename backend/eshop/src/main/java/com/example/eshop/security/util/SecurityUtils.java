@@ -12,8 +12,7 @@ public class SecurityUtils {
     
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof CustomUserDetails) {
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        if (authentication != null && authentication.isAuthenticated() && authentication.getPrincipal() instanceof CustomUserDetails userDetails) {
             logger.debug("Found user ID in security context: {}", userDetails.getId());
             return userDetails.getId();
         }
@@ -28,7 +27,7 @@ public class SecurityUtils {
             logger.debug("Checking if user {} owns resource {}", currentUserId, resourceId);
             return currentUserId.equals(resourceId);
         } catch (Exception e) {
-            logger.error("Error checking resource ownership", e.getMessage());
+            logger.error("Error checking resource ownership {}", e.getMessage());
             return false;
         }
     }

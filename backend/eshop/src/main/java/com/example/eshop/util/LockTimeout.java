@@ -1,4 +1,4 @@
-package com.example.eshop.security.util;
+package com.example.eshop.util;
 
 import java.lang.annotation.*;
 

@@ -1,4 +1,4 @@
-package com.example.eshop.security.aspect;
+package com.example.eshop.aspect;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -6,7 +6,7 @@ import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
 
 import com.example.eshop.exception.ResourceOwnershipException;
-import com.example.eshop.security.util.CheckResourceOwnership;
+import com.example.eshop.util.CheckResourceOwnership;
 import com.example.eshop.security.util.SecurityUtils;
 
 import org.slf4j.Logger;

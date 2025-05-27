@@ -1,10 +1,12 @@
 package com.example.eshop.security.util;
 
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 import java.util.Collection;
 
+@Getter
 public class CustomUserDetails extends User {
     private final Long id;
 
@@ -15,7 +17,4 @@ public class CustomUserDetails extends User {
         this.id = id;
     }
 
-    public Long getId() {
-        return id;
-    }
 }

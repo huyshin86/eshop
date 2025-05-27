@@ -1,5 +1,6 @@
-package com.example.eshop.security.validation;
+package com.example.eshop.util;
 
+import com.example.eshop.security.validation.PasswordMatchesValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 import java.lang.annotation.*;
