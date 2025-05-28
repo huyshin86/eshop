@@ -86,6 +86,12 @@ public class Order {
     @JsonManagedReference
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @Column(name = "paypal_order_id", unique = true)
+    private String paypalOrderId;
+
+    @Column(name = "payment_captured_at")
+    private LocalDateTime paymentCapturedAt;
+
     public enum OrderStatus {
         PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELLED
     }

@@ -1,0 +1,27 @@
+version: '3.9'
+
+services:
+  backend:
+    profiles: ["prod"]
+    build:
+      context: ./backend/eshop
+      dockerfile: Dockerfile
+    image: eshop-backend:prod
+    working_dir: /app
+    env_file:
+      - ./backend/eshop/.env.docker
+    ports:
+      - "8080:8080"
+
+  backend-dev:
+    profiles: ["dev"]
+    image: maven:3.9.6-eclipse-temurin-21
+    working_dir: /app
+    volumes:
+      - ./backend/eshop:/app
+      - ~/.m2:/root/.m2
+    command: mvn spring-boot:run
+    env_file:
+      - ./backend/eshop/.env.docker
+    ports:
+      - "8080:8080"

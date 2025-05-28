@@ -48,7 +48,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/user/**").hasAnyRole("CUSTOMER", "ADMIN")
                         .requestMatchers("/api/cart/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/checkout").hasRole("CUSTOMER")
+                        .requestMatchers("/api/checkout/**").hasRole("CUSTOMER")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
@@ -74,7 +74,7 @@ public class SecurityConfig {
                             response.getWriter().write(errorMessage);
                         }))
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // To if-required for testing
                         .maximumSessions(1)
                         .expiredUrl("/api/auth/login?expired"));
 
