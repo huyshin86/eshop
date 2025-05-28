@@ -15,6 +15,8 @@ import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,7 @@ public class OrderService {
     private final ProductJpaRepository productRepo;
     private final OrderJpaRepository orderRepo;
     private final PayPalService payPalService;
+    private final CartService cartService;
 
     private static final int calculationScale = 2;
     private static final RoundingMode calculationRoundingMode = RoundingMode.HALF_UP;
@@ -84,6 +87,11 @@ public class OrderService {
             throw new IllegalStateException("Order is not in pending state: " + businessOrder.getOrderNumber());
         }
 
+        String status = payPalService.getOrderStatus(paypalOrderId);
+        if (!"APPROVED".equalsIgnoreCase(status)) {
+            throw new IllegalStateException("PayPal order is not approved for capture. Current status: " + status);
+        }
+
         try {
             // Capture PayPal payment
             com.paypal.sdk.models.Order capturedPayPalOrder = payPalService.capturePayPalOrder(paypalOrderId);
@@ -118,19 +126,96 @@ public class OrderService {
         Order businessOrder = orderRepo.findByPaypalOrderId(paypalOrderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found for PayPal ID: " + paypalOrderId));
 
-        if (businessOrder.getOrderStatus() == Order.OrderStatus.PENDING) {
-            // Rollback inventory
-            rollbackInventory(businessOrder);
+        doCancelOrder(businessOrder);
+    }
 
-            // Update order status
-            businessOrder.setOrderStatus(Order.OrderStatus.CANCELLED);
-            orderRepo.save(businessOrder);
+    @Scheduled(fixedDelay = 60 * 60 * 1000) // 1 hour in ms
+    public void cleanupStalePendingOrders() {
+        LocalDateTime cutoff = LocalDateTime.now().minusHours(1);
+        List<Order> staleOrders = orderRepo.findByOrderStatusAndOrderDateBefore(Order.OrderStatus.PENDING, cutoff);
 
-            log.info("Order cancelled: {}", businessOrder.getOrderNumber());
+        for (Order order : staleOrders) {
+            try {
+                log.info("Cleaning up stale PENDING order: {}", order.getOrderNumber());
+                processSingleStaleOrder(order);
+            } catch (Exception e) {
+                log.error("Failed to cancel stale order: {}", order.getOrderNumber(), e);
+            }
+        }
+    }
+
+    // Protected helper methods
+    // Handles an individual stale order in its own transaction
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+    protected void processSingleStaleOrder(Order order) {
+        String paypalOrderId = order.getPaypalOrderId();
+
+        if (paypalOrderId == null || paypalOrderId.isBlank()) {
+            log.warn("Stale PENDING order {} has no PayPal ID. Marking as CANCELLED.", order.getOrderNumber());
+            rollbackInventory(order);
+            order.setOrderStatus(Order.OrderStatus.CANCELLED);
+            orderRepo.save(order);
+            return;
+        }
+
+        try {
+            String payPalStatus = payPalService.getOrderStatus(paypalOrderId);
+
+            if ("APPROVED".equalsIgnoreCase(payPalStatus)) {
+                log.info("Order {} (PayPal ID: {}) is APPROVED on PayPal. Attempting capture.", order.getOrderNumber(), paypalOrderId);
+                try {
+                    payPalService.capturePayPalOrder(paypalOrderId);
+                    order.setOrderStatus(Order.OrderStatus.PROCESSING);
+                    order.setPaymentCapturedAt(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+                    cartService.clearCart(order.getUser().getId());
+                    orderRepo.save(order);
+                    log.info("Successfully captured and processed order {}.", order.getOrderNumber());
+                } catch (PaymentProcessingException e) {
+                    // Capture failed even though PayPal said APPROVED. Payment might be captured manually later
+                    order.setOrderStatus(Order.OrderStatus.MANUAL_REVIEW_PAYMENT);
+                    orderRepo.save(order);
+                    log.error("CRITICAL: Capture failed for APPROVED order {}. PayPal ID: {}. Error: {}",
+                            order.getOrderNumber(), paypalOrderId, e.getMessage());
+                }
+            } else if (List.of("VOIDED", "COMPLETED", "DENIED").contains(payPalStatus.toUpperCase())) {
+                // These are final statuses where no payment can happen
+                log.info("Order {} (PayPal ID: {}) has final PayPal status {}. Cancelling locally.",
+                        order.getOrderNumber(), paypalOrderId, payPalStatus);
+                doCancelOrder(order);
+            } else {
+                // PayPal status is CREATED, PENDING, or ambiguous no cancel yet
+                log.warn("Order {} (PayPal ID: {}) has ambiguous PayPal status {}. Retaining for next cycle.",
+                        order.getOrderNumber(), paypalOrderId, payPalStatus);
+            }
+        } catch (PaymentProcessingException e) {
+            LocalDateTime orderTime = order.getCreatedAt();
+            if (orderTime.isBefore(LocalDateTime.now().minusHours(3))) {
+                log.warn("Order {} is older than 3 hours and PayPal status could not be retrieved. Marking as EXPIRED.",
+                        order.getOrderNumber());
+                order.setOrderStatus(Order.OrderStatus.PAYMENT_STATUS_UNKNOWN);
+                orderRepo.save(order);
+            } else {
+                log.error("Failed to retrieve PayPal status for order {}: {}. Will retry next cycle.",
+                        order.getOrderNumber(), e.getMessage());
+            }
         }
     }
 
     // Private helper methods
+    private void doCancelOrder(Order businessOrder) {
+        if (businessOrder.getOrderStatus() == Order.OrderStatus.PENDING) {
+            rollbackInventory(businessOrder);
+            businessOrder.setOrderStatus(Order.OrderStatus.CANCELLED);
+            businessOrder.setPaypalOrderId(null);
+            orderRepo.save(businessOrder);
+            log.info("Order cancelled: {}", businessOrder.getOrderNumber());
+        } else {
+            log.info("Cancel order called but order {} is in status {}, skipping cancel",
+                    businessOrder.getOrderNumber(), businessOrder.getOrderStatus());
+        }
+    }
+
     @Retryable(
             retryFor = {
                     PessimisticLockException.class,
@@ -301,32 +386,32 @@ public class OrderService {
     // Catch business exceptions
     @Recover
     public OrderDto recoverFromUserNotFound(UserNotFoundException ex, Long userId) {
-        throw ex;  // Re-throw to global handler
+        throw ex;  // Re-throw to global handler since it has its own response
     }
 
     @Recover
     public OrderDto recoverFromCartEmpty(CartEmptyException ex, Long userId) {
-        throw ex;  // Re-throw to global handler
+        throw ex;  // Re-throw to global handler since it has its own response
     }
 
     @Recover
     public OrderDto recoverFromShippingMissing(ShippingAddressMissingException ex, Long userId) {
-        throw ex;  // Re-throw to global handler
+        throw ex;  // Re-throw to global handler since it has its own response
     }
 
     @Recover
     public OrderDto recoverFromProductNotFound(ProductNotFoundException ex, Long userId) {
-        throw ex;  // Re-throw to global handler
+        throw ex;  // Re-throw to global handler since it has its own response
     }
 
     @Recover
     public OrderDto recoverFromProductNotAvailable(ProductNotAvailableException ex, Long userId) {
-        throw ex;  // Re-throw to global handler
+        throw ex;  // Re-throw to global handler since it has its own response
     }
 
     @Recover
     public OrderDto recoverFromInsufficientStock(InsufficientProductStockException ex, Long userId) {
-        throw ex;  // Re-throw to global handler
+        throw ex;  // Re-throw to global handler since it has its own response
     }
 
     // Generic fallback for lock-related exceptions after retry attempts and any other exceptions

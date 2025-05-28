@@ -35,7 +35,7 @@ public class PayPalConfig {
                         .requestConfig(logConfigBuilder -> logConfigBuilder.body(true))
                         .responseConfig(logConfigBuilder -> logConfigBuilder.headers(true)))
                 .httpClientConfig(configBuilder -> configBuilder
-                        .timeout(0))
+                        .timeout(10000))
                 .environment(environment)
                 .clientCredentialsAuth(new ClientCredentialsAuthModel.Builder(
                                 PAYPAL_CLIENT_ID,

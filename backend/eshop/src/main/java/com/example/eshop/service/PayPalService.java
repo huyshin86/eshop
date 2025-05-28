@@ -80,6 +80,30 @@ public class PayPalService {
         }
     }
 
+    // Check PayPal order status for capture
+    public String getOrderStatus(String paypalOrderId) throws PaymentProcessingException {
+        try {
+            OrdersController ordersController = paypalClient.getOrdersController();
+            GetOrderInput getOrderInput = new GetOrderInput.Builder(paypalOrderId).build();
+
+            ApiResponse<com.paypal.sdk.models.Order> apiResponse = ordersController.getOrder(getOrderInput);
+            com.paypal.sdk.models.Order paypalOrder = apiResponse.getResult();
+
+            if (paypalOrder == null) {
+                throw new PaymentProcessingException("PayPal order not found: " + paypalOrderId);
+            }
+
+            String status = paypalOrder.getStatus().toString();  // status like "CREATED", "APPROVED", "COMPLETED"
+            log.info("PayPal order ID {} status: {}", paypalOrderId, status);
+
+            return status;
+
+        } catch (ApiException | IOException e) {
+            log.error("Failed to get PayPal order status for ID: {}", paypalOrderId, e);
+            throw new PaymentProcessingException("Unable to retrieve PayPal order status: " + e.getMessage());
+        }
+    }
+
     // Builds PayPal CreateOrderInput from business order
     private CreateOrderInput buildCreateOrderInput(Order businessOrder) {
         // Convert order items to PayPal items
