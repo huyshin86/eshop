@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 @Component
 public class SecurityUtils {
     private static final Logger logger = LoggerFactory.getLogger(SecurityUtils.class);
+
+    private SecurityUtils() {}
     
     public static Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
