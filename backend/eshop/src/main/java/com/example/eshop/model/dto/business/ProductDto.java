@@ -3,12 +3,14 @@ package com.example.eshop.model.dto.business;
 import java.math.BigDecimal;
 
 public record ProductDto(
-        Long productId,
-        String productName,
+        Long id,
+        String name,
         String description,
         BigDecimal price,
         String imageUrl,
-        Integer stock,
+        Integer stockQuantity,
+        Long categoryId,
+        String categoryName,
         Boolean isActive
 ) {
 }

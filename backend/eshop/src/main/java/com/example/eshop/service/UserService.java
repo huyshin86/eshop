@@ -6,9 +6,12 @@ import com.example.eshop.model.Order;
 import com.example.eshop.model.OrderItem;
 import com.example.eshop.model.Product;
 import com.example.eshop.model.User;
+import com.example.eshop.model.common.Role;
 import com.example.eshop.model.dto.business.*;
 import com.example.eshop.repository.interfaces.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
@@ -62,6 +65,46 @@ public class UserService {
                 .filter(order -> order.getOrderStatus().toString().equalsIgnoreCase(status))
                 .map(this::toOrderResponseDto)
                 .toList();
+    }
+
+    // Admin methods
+    @Transactional(readOnly = true)
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepo.findAll(pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public User getUserById(Long id) {
+        return findUserById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> searchUsersByEmail(String email) {
+        return userRepo.findByEmailContainingIgnoreCase(email);
+    }
+
+    public User updateUserRole(Long id, String roleStr) {
+        User user = findUserById(id);
+        
+        Role role;
+        try {
+            role = Role.valueOf(roleStr.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid role: " + roleStr);
+        }
+        
+        user.setRole(role);
+        return userRepo.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        User user = findUserById(id);
+        userRepo.delete(user);
+    }
+
+    @Transactional(readOnly = true)
+    public Long getTotalUserCount() {
+        return userRepo.count();
     }
 
     private void updateUserFields(User user, UpdateUserInfoRequest request) {
@@ -148,17 +191,17 @@ public class UserService {
                 item.getUnitPrice(),
                 item.getTotal()
         );
-    }
-
-    private ProductDto toProductDto(Product product) {
+    }    private ProductDto toProductDto(Product product) {
         return new ProductDto(
-                product.getProductId(),
-                product.getProductName(),
-                null,
-                null,
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
                 product.getImageUrl(),
-                null,
-                null
+                product.getStockQuantity(),
+                product.getCategory() != null ? product.getCategory().getId() : null,
+                product.getCategory() != null ? product.getCategory().getName() : null,
+                product.getIsActive()
         );
     }
 }

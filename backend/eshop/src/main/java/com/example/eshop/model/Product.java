@@ -18,6 +18,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -26,6 +27,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "products")
 public class Product {
@@ -53,9 +55,8 @@ public class Product {
     private String imageUrl;
 
     @Column(nullable = false)
-    private Integer stock;
-
-    @Column(name = "is_active", nullable = false)
+    private Integer stock;    @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 
     @CreationTimestamp
@@ -65,4 +66,29 @@ public class Product {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+    
+    // Convenience methods for DTO compatibility
+    public Long getId() {
+        return this.productId;
+    }
+    
+    public void setId(Long id) {
+        this.productId = id;
+    }
+    
+    public String getName() {
+        return this.productName;
+    }
+    
+    public void setName(String name) {
+        this.productName = name;
+    }
+    
+    public Integer getStockQuantity() {
+        return this.stock;
+    }
+    
+    public void setStockQuantity(Integer stockQuantity) {
+        this.stock = stockQuantity;
+    }
 }

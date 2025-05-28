@@ -57,4 +57,21 @@ public class Category {
     // Relationships
     @OneToMany(mappedBy = "category", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     private List<Product> products = new ArrayList<>();
+
+    // Convenience methods for DTO compatibility
+    public Long getId() {
+        return this.categoryId;
+    }
+
+    public void setId(Long id) {
+        this.categoryId = id;
+    }
+
+    public String getName() {
+        return this.categoryName;
+    }
+
+    public void setName(String name) {
+        this.categoryName = name;
+    }
 }
