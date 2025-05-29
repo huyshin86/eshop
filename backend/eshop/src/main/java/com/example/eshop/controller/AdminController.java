@@ -1,10 +1,13 @@
 package com.example.eshop.controller;
 
+import com.example.eshop.exception.MissingImageException;
 import com.example.eshop.model.Category;
 import com.example.eshop.model.Product;
 import com.example.eshop.model.User;
 import com.example.eshop.model.dto.business.ProductDto;
+import com.example.eshop.model.dto.business.ProductRequest;
 import com.example.eshop.service.CategoryService;
+import com.example.eshop.service.ImageUploadService;
 import com.example.eshop.service.ProductService;
 import com.example.eshop.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,13 +40,26 @@ public class AdminController {
     private final ProductService productService;
     private final CategoryService categoryService;
     private final UserService userService;
+    private final ImageUploadService imageUploadService;
 
     // Product Management Endpoints
-    
+
     @PostMapping("/products")
     @Operation(summary = "Create a new product")
-    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto) {
-        log.debug("Admin creating new product: {}", productDto.name());
+    public ResponseEntity<ProductDto> createProduct(
+            @Valid @ModelAttribute ProductRequest productRequest) {
+
+        log.debug("Admin creating new product: {}", productRequest.name());
+
+        // Image is require for creating new product
+        if (productRequest.image() == null || productRequest.image().isEmpty()){
+            throw new MissingImageException(productRequest.name());
+        }
+
+        String imageUrl = imageUploadService.uploadImage(productRequest.image(), productRequest.name());
+
+        ProductDto productDto = new ProductDto(null ,productRequest.name(), productRequest.description(), productRequest.price(), imageUrl, productRequest.stockQuantity(), productRequest.categoryId(), productRequest.categoryName(), productRequest.isActive()); // Since createProduct use ProductDto has image as url not file
+
         Product createdProduct = productService.createProduct(productDto);
         ProductDto responseDto = productService.convertToDto(createdProduct);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
@@ -53,9 +69,32 @@ public class AdminController {
     @Operation(summary = "Update an existing product")
     public ResponseEntity<ProductDto> updateProduct(
             @Parameter(description = "Product ID") @PathVariable Long id,
-            @Valid @RequestBody ProductDto productDto) {
+            @Valid @ModelAttribute ProductRequest productRequest) {
         
         log.debug("Admin updating product with id: {}", id);
+
+        Product existingProduct = productService.getProductById(id);
+        String currentName = existingProduct.getProductName();
+        String newName = productRequest.name();
+
+        String newImageUrl = existingProduct.getImageUrl(); // Initiate newImageUrl with existing one
+
+        // If change product name
+        if (!currentName.equalsIgnoreCase(newName)){
+            String getImage = imageUploadService.renameImage(currentName, newName);
+
+            if (getImage != null){
+                newImageUrl = getImage;
+            }
+        }
+
+        // If upload new image
+        if (productRequest.image() != null && !productRequest.image().isEmpty()) {
+            newImageUrl = imageUploadService.uploadImage(productRequest.image(), newName);
+        }
+
+        ProductDto productDto = new ProductDto(productRequest.id(), productRequest.name(), productRequest.description(), productRequest.price(), newImageUrl, productRequest.stockQuantity(), productRequest.categoryId(), productRequest.categoryName(), productRequest.isActive()); // Since createProduct use ProductDto has image as url not file
+
         Product updatedProduct = productService.updateProduct(id, productDto);
         ProductDto responseDto = productService.convertToDto(updatedProduct);
         return ResponseEntity.ok(responseDto);
@@ -67,6 +106,10 @@ public class AdminController {
             @Parameter(description = "Product ID") @PathVariable Long id) {
         
         log.debug("Admin deleting product with id: {}", id);
+
+        Product product = productService.getProductById(id);
+        imageUploadService.deleteImage(product.getProductName());
+
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

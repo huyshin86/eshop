@@ -2,7 +2,6 @@ package com.example.eshop.service;
 
 import com.example.eshop.exception.EmailAlreadyInUseException;
 import com.example.eshop.model.User;
-import com.example.eshop.model.common.Role;
 import com.example.eshop.model.dto.auth.RegisterRequest;
 import com.example.eshop.repository.interfaces.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +23,14 @@ public class RegisterService {
             throw new EmailAlreadyInUseException(dto.email());
         }
 
-        User user = new User(
-                dto.email(),
-                passwordEncoder.encode(dto.passwordFields().password()),
-                dto.firstName(),
-                dto.lastName(),
-                dto.phone(),
-                dto.address(),
-                Role.CUSTOMER);
+        User user = User.builder()
+                .email(dto.email())
+                .hashedPassword(passwordEncoder.encode(dto.passwordFields().password()))
+                .firstName(dto.firstName())
+                .lastName(dto.lastName())
+                .phoneNumber(dto.phone())
+                .address(dto.address())
+                .build();
 
         return userRepo.save(user);
     }

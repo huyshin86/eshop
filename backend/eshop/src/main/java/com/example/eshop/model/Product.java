@@ -55,7 +55,9 @@ public class Product {
     private String imageUrl;
 
     @Column(nullable = false)
-    private Integer stock;    @Column(name = "is_active", nullable = false)
+    private Integer stock;
+
+    @Column(name = "is_active", nullable = false)
     @Builder.Default
     private Boolean isActive = true;
 

@@ -4,10 +4,7 @@ import com.example.eshop.model.common.Role;
 import com.example.eshop.model.common.UserStatus;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -17,6 +14,7 @@ import java.util.List;
 @Table(name = "users")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -56,29 +54,13 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @Builder.Default
     private List<Order> orders = new ArrayList<>();
-
-    // Constructor for creating new user
-    public User(String email, String hashedPassword, String firstName, String lastName,
-                String phoneNumber, String address, Role role) {
-        if(email == null || email.trim().isEmpty())
-            throw new IllegalArgumentException("Email can not be empty!");
-        if (hashedPassword == null || hashedPassword.trim().isEmpty())
-            throw new IllegalArgumentException("Password can not be empty!");
-
-        this.email = email;
-        this.hashedPassword = hashedPassword;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.phoneNumber = phoneNumber;
-        this.address = address;
-        this.role = role;
-        this.status = UserStatus.ACTIVE;
-    }
 
     public boolean isActive() {
         return status.equals(UserStatus.ACTIVE);

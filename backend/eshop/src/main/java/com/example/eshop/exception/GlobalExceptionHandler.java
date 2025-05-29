@@ -243,7 +243,9 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
-    }    // Custom error response for multiple fail checkouts
+    }
+
+    // Custom error response for multiple fail checkouts
     @ExceptionHandler(CheckoutFailException.class)
     public ResponseEntity<ErrorResponse> handleCheckoutFailException(CheckoutFailException ex, HttpServletRequest request){
         logger.error("Checkout failed after multiple attempts for user {} with error {}", ex.getUserId(), ex.getExceptionMessage());
@@ -268,5 +270,14 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.CONFLICT, request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    // Custom error response for missing image
+    @ExceptionHandler(MissingImageException.class)
+    public ResponseEntity<ErrorResponse> handleMissingImageException(MissingImageException ex, HttpServletRequest request){
+        logger.error("Image is missing for product {}", ex.getProductName());
+        ErrorResponse response = new ErrorResponse(HttpStatus.BAD_REQUEST ,request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 }
