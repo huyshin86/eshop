@@ -134,7 +134,7 @@ public class CartService {
 
     private CartItemDto toCartItemDto(CartItem item) {
         ProductDto productDto = toProductDto(item.getProduct());
-        boolean isAvailable = (item.getQuantity() <= productDto.stock()) && productDto.isActive();
+        boolean isAvailable = (item.getQuantity() <= productDto.stockQuantity()) && productDto.isActive();
 
         return new CartItemDto(
                 item.getCartItemId(),
@@ -142,16 +142,16 @@ public class CartService {
                 item.getQuantity(),
                 isAvailable
         );
-    }
-
-    private ProductDto toProductDto(Product product) {
+    }    private ProductDto toProductDto(Product product) {
         return new ProductDto(
-                product.getProductId(),
-                product.getProductName(),
-                null, // Description is not needed in cart view
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
                 product.getPrice(),
                 product.getImageUrl(),
-                product.getStock(),
+                product.getStockQuantity(),
+                product.getCategory() != null ? product.getCategory().getId() : null,
+                product.getCategory() != null ? product.getCategory().getName() : null,
                 product.getIsActive()
         );
     }

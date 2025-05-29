@@ -369,17 +369,17 @@ public class OrderService {
                 item.getUnitPrice(),
                 item.getTotal()
         );
-    }
-
-    private ProductDto toProductDto(Product product) {
+    }    private ProductDto toProductDto(Product product) {
         return new ProductDto(
-                product.getProductId(),
-                product.getProductName(),
-                null,
-                null,
+                product.getId(),
+                product.getName(),
+                product.getDescription(),
+                product.getPrice(),
                 product.getImageUrl(),
-                null,
-                null
+                product.getStockQuantity(),
+                product.getCategory() != null ? product.getCategory().getId() : null,
+                product.getCategory() != null ? product.getCategory().getName() : null,
+                product.getIsActive()
         );
     }
 

@@ -243,14 +243,30 @@ public class GlobalExceptionHandler {
         ErrorResponse response = new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
-    }
-
-    // Custom error response for multiple fail checkouts
+    }    // Custom error response for multiple fail checkouts
     @ExceptionHandler(CheckoutFailException.class)
     public ResponseEntity<ErrorResponse> handleCheckoutFailException(CheckoutFailException ex, HttpServletRequest request){
         logger.error("Checkout failed after multiple attempts for user {} with error {}", ex.getUserId(), ex.getExceptionMessage());
         ErrorResponse response = new ErrorResponse(HttpStatus.TOO_MANY_REQUESTS ,request.getRequestURI());
         response.addError("message", ex.getMessage());
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(response);
+    }
+
+    // Custom error response for category not found
+    @ExceptionHandler(CategoryNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCategoryNotFoundException(CategoryNotFoundException ex, HttpServletRequest request){
+        logger.error("Category not found: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(HttpStatus.NOT_FOUND, request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    // Custom error response for duplicate category
+    @ExceptionHandler(DuplicateCategoryException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateCategoryException(DuplicateCategoryException ex, HttpServletRequest request){
+        logger.error("Duplicate category: {}", ex.getMessage());
+        ErrorResponse response = new ErrorResponse(HttpStatus.CONFLICT, request.getRequestURI());
+        response.addError("message", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
     }
 }
