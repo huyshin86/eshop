@@ -9,7 +9,5 @@ public record AuthRequest(
 
         @NotBlank(message = "Password is required")
         // @Size(min = 8, message = "Password must be at least 8 characters long") Since test password is short
-        String password, 
-
-        String confirmCode) {
+        String password) {
 }

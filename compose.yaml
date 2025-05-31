@@ -8,9 +8,23 @@ services:
     working_dir: /app
     env_file:
       - ./backend/eshop/.env.docker
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     ports:
       - "8080:8080"
 
+  frontend:
+    profiles: [ "prod" ]
+    build:
+      context: ./frontend/eshop
+      dockerfile: Dockerfile
+    image: vite-frontend:prod
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "3000:80"
+
+  # Development services
   backend-dev:
     profiles: ["dev"]
     image: maven:3.9.6-eclipse-temurin-21
@@ -21,5 +35,19 @@ services:
     command: mvn spring-boot:run
     env_file:
       - ./backend/eshop/.env.docker
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
     ports:
       - "8080:8080"
+
+  frontend-dev:
+    profiles: [ "dev" ]
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./frontend/eshop:/app
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+    ports:
+      - "3000:3000"

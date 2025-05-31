@@ -1,23 +1,18 @@
 INSERT INTO users (email, password_hash, role, first_name, last_name, phone_number, address) VALUES
-('admin@localhost', '$2b$12$XsjLcbuu5NRARZC2n/KG9.KjDmJD/EgAkzzLB7Y/uGSPNpA24L8NK', 'ADMIN', 'admin', 'admin', '123456789', null),
-('customer@localhost', '$2b$12$XsjLcbuu5NRARZC2n/KG9.KjDmJD/EgAkzzLB7Y/uGSPNpA24L8NK', 'CUSTOMER', 'customer', 'customer', '123456789', 'abc street');
+('admin@localhost.com', '$2b$12$XsjLcbuu5NRARZC2n/KG9.KjDmJD/EgAkzzLB7Y/uGSPNpA24L8NK', 'ADMIN', 'admin', 'admin', '0123456789', null),
+('customer@localhost.com', '$2b$12$XsjLcbuu5NRARZC2n/KG9.KjDmJD/EgAkzzLB7Y/uGSPNpA24L8NK', 'CUSTOMER', 'customer', 'customer', '0123456789', 'abc street');
 
 INSERT INTO categories (category_name, slug, description, image_url) VALUES
-('Test', 'test', null, 'test-local-png');
+('Laptop', 'laptop', null, null);
 
 INSERT INTO products (category_id, product_name, description, price, image_url, stock, is_active) VALUES
-(1, 'Test product 1', 'This is test product', 69.69, 'test-product-local-png', 69, 1),
-(1, 'Test product 2', 'This is test product', 69.69, 'test-product-local-png', 0, 1),
-(1, 'Test product 3', 'This is test product', 69.69, 'test-product-local-png', 10, 0);
-
-
-INSERT INTO orders (user_id, order_number, order_status, subtotal, grand_total, shipping_address) VALUES
-(2, 'abc123', 'CANCELLED', 69.69, 69.69, 'abc street');
-
-INSERT INTO order_items (order_id, product_id, quantity, unit_price, total) VALUES
-(1, 1, 1, 69.69, 69.69);
-
-INSERT INTO cart_items(user_id, product_id, quantity) VALUES
-(2, 1, 10),
-(2, 3, 10),
-(2, 2, 3);
+(1, 'Acer Aspire 5', 'The Acer Aspire 5 is a versatile laptop that combines performance and portability. It features a sleek design, powerful hardware, and a vibrant display, making it ideal for both work and entertainment.', 579.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748687317/products/acer-aspire-5.jpg', 100, TRUE),
+(1, 'Asus ROG zephyrus G14', 'The Asus ROG Zephyrus G14 is a high-performance gaming laptop that offers a perfect blend of power and portability. With its AMD Ryzen processor and NVIDIA GeForce graphics, it delivers exceptional gaming performance in a compact design.', 1039.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748687390/products/asus-rog-zephyrus-g14.webp', 100, TRUE),
+(1, 'Dell XPS 15', 'The Dell XPS 15 is a premium laptop that combines cutting-edge technology with a stunning design. It features a high-resolution display, powerful Intel processors, and dedicated NVIDIA graphics, making it perfect for creative professionals and power users.', 1159.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748687462/products/dell-xps-15.jpg', 100, TRUE),
+(1, 'Dell Vostro 3520', 'Everyday tasks are quickly handled with ease using up to 12th Gen Intel® Core™ Processors.', 499.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688523/products/dell-vostro-3520.jpg', 100, TRUE),
+(1, 'HP 250 G10', 'The budget-friendly, business-ready HP 250 G10 Laptop provides essential power and productivity features in a thin and light design with a large 15.6-inch diagonal display.', 549.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688610/products/hp-250-g10.jpg', 100, TRUE),
+(1, 'Laptop HP 15', 'Say hello to the reliable PCs that easily pass the vibe check. HP PCs are built with dependable technology, next-level power, and rock-solid performance that turn your to-do lists into to-done lists.', 879.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688687/products/laptop-hp-15.jpg', 100, TRUE),
+(1, 'Lenovo Legion 5 Pro', 'The Lenovo Legion 5 Pro is a powerful gaming laptop designed for serious gamers. It features a high-refresh-rate display, AMD Ryzen processors, and NVIDIA GeForce RTX graphics, delivering an immersive gaming experience with stunning visuals.', 1599.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688728/products/lenovo-legion-5-pro.webp', 100, TRUE),
+(1, 'Lenovo IdeaPad Slim 3', 'Make a statement wherever you go with the IdeaPad Slim 3 Gen 8 laptop, built for lightness and thinness, measuring up to 10% slimmer than the previous generation.', 569.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688780/products/lenovo-ideapad-slim-3.jpg', 100, TRUE),
+(1, 'Macbook Air M1', 'The MacBook Air with M1 chip is a game-changer, offering incredible performance, long battery life, and a fanless design for silent operation. It''s perfect for everyday tasks and creative work.', 919.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688817/products/macbook-air-m1.jpg', 100, TRUE),
+(1, 'Macbook Air M3', 'The MacBook Air with M3 chip is the latest in Apple''s lineup, delivering even more power and efficiency. With its sleek design and advanced features, it''s perfect for professionals and students alike.', 1239.99, 'https://res.cloudinary.com/djur3ojeu/image/upload/v1748688862/products/macbook-air-m3.jpg', 100, TRUE);

@@ -26,5 +26,8 @@ public record RegisterRequest(
         String phone,
 
         @NotBlank(message = "Address is required")
-        String address) {
+        String address,
+
+        // Not implemented yet
+        String confirmCode) {
 }

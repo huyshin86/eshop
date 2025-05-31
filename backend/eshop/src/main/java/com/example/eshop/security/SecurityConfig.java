@@ -64,7 +64,6 @@ public class SecurityConfig {
                             response.setStatus(401);
                             String timestamp = LocalDateTime.now().format(CUSTOM_TIMESTAMP_FORMATTER);
 
-                            // Manually construct the JSON string to match your desired output
                             String errorMessage = String.format(
                                     "{\"path\":\"%s\", \"timestamp\":\"%s\", \"status\":%d, \"errors\":{\"message\":\"%s\"}}",
                                     request.getRequestURI(),
@@ -112,8 +111,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        //TODO Update ui url to be accepted by cors
-        configuration.setAllowedOrigins(List.of("http://127.0.0.1:5500", "http://127.0.0.1:5501"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

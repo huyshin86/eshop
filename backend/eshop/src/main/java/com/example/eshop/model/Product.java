@@ -45,7 +45,7 @@ public class Product {
     private String productName;
 
     @Lob // For TEXT type
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false, precision = 10, scale = 2)

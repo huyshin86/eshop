@@ -2,6 +2,8 @@ package com.example.eshop.service;
 
 import com.example.eshop.exception.EmailAlreadyInUseException;
 import com.example.eshop.model.User;
+import com.example.eshop.model.common.Role;
+import com.example.eshop.model.common.UserStatus;
 import com.example.eshop.model.dto.auth.RegisterRequest;
 import com.example.eshop.repository.interfaces.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class RegisterService {
                 .lastName(dto.lastName())
                 .phoneNumber(dto.phone())
                 .address(dto.address())
+                .role(Role.CUSTOMER)
+                .status(UserStatus.ACTIVE)
                 .build();
 
         return userRepo.save(user);

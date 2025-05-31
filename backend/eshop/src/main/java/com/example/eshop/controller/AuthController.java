@@ -14,16 +14,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
+import java.util.Optional;
 
 @Validated
 @RestController
@@ -49,6 +50,25 @@ public class AuthController {
         Authentication authentication = authenticateUserAndCreateSession(user.getEmail(), registerRequest.passwordFields().password(), request);
     
         return ResponseEntity.ok(new SuccessResponse<>(HttpStatus.OK, "Register successful"));
+    }
+
+    @GetMapping("/user-role")
+    public ResponseEntity<?> getUserRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "User not authenticated"));
+        }
+
+        Optional<? extends GrantedAuthority> roleOpt = authentication.getAuthorities().stream().findFirst();
+
+        if (roleOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Role not found"));
+        }
+
+        String role = roleOpt.get().getAuthority().replace("ROLE_", "");
+
+        return ResponseEntity.ok(Map.of("role", role));
     }
 
     private Authentication authenticateUserAndCreateSession(String email, String rawPassword, HttpServletRequest request) {
