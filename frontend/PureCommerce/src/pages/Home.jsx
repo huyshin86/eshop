@@ -1,5 +1,4 @@
 import React from "react";
-
 import Footer from "../components/Footer";
 import ProductGrid from "../components/ProductGrid";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,11 +14,12 @@ const categories = [
 
 function Home() {
   const dispatch = useDispatch();
+  const [sortOption, setSortOption] = React.useState("name-asc");
 
   return (
     <div>
       <div className="flex justify-center items-center h-screen bg"></div>
-      <div className="mx-auto container my-10 px-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 mx-2 my-2">
         <div className="flex gap-4">
           {categories.map((cat) => {
             return (
@@ -33,7 +33,24 @@ function Home() {
             );
           })}
         </div>
-        <ProductGrid />
+
+        <div className="flex items-center gap-2 mx-2 my-2">
+          <label htmlFor="sort" className="font-medium">Filter:</label>
+          <select
+          id="sort"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+          className="border rounded-md p-2"
+          >
+            <option value="name-asc">A → Z</option>
+            <option value="name-desc">Z → A</option>
+            <option value="price-asc">Low → High</option>
+            <option value="price-desc">High → Low</option>
+          </select>
+        </div>
+
+        <ProductGrid sortOption={sortOption} />
+
       </div>
 
       {/* Footer */}
