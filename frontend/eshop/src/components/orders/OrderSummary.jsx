@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 
 const OrderSummary = ({ order }) => (
   <div className="mt-6 border-t pt-6">
@@ -30,5 +30,15 @@ const OrderSummary = ({ order }) => (
     </div>
   </div>
 );
+
+OrderSummary.propTypes = {
+  order: PropTypes.shape({
+    subtotal: PropTypes.number.isRequired,
+    shippingCost: PropTypes.number.isRequired,
+    tax: PropTypes.number.isRequired,
+    discountAmount: PropTypes.number.isRequired,
+    grandTotal: PropTypes.number.isRequired,
+  }).isRequired,
+};
 
 export default OrderSummary;

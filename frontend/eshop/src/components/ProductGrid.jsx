@@ -1,7 +1,11 @@
-import React from "react";
 import { useSelector } from "react-redux";
 import ProductCard from "./ProductCard";
 import { useMemo } from "react";
+import PropTypes from "prop-types";
+
+ProductGrid.propTypes = {
+  sortOption: PropTypes.string.isRequired,
+};
 
 export default function ProductGrid({ sortOption }) {
   const products = useSelector((state) => state.product.filteredItems);
@@ -44,7 +48,7 @@ export default function ProductGrid({ sortOption }) {
   }, [products, sortOption]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-16 my-24">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 md:gap-16 my-24">
       {sortedProducts.map((product) => (
         <ProductCard key={product.id} product={product} />
       ))}

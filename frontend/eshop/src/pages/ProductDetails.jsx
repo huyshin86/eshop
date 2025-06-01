@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ShoppingCart } from "lucide-react";
@@ -38,6 +37,7 @@ function ProductDetails() {
                 src={product.imageUrl}
                 alt={product.name}
                 className="absolute inset-0 w-full h-full object-contain rounded-lg"
+                loading="lazy"
               />
             </div>
           </div>

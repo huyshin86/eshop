@@ -1,6 +1,6 @@
 //TODO: Create a popular products page for the admin to manage products
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 
 const Products = () => {

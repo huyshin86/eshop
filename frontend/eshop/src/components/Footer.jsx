@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import React from "react";
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import Logo from "../assets/imgs/showcase/logo.svg";
 

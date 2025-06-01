@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import ProductGrid from "../components/ProductGrid";
 import { useDispatch } from "react-redux";
@@ -28,39 +28,40 @@ function Home() {
   return (
     <div>
       <div className="bg flex justify-center items-center"></div>
-      <div className="flex flex-wrap items-center justify-between gap-2 mx-2 my-2">
-        <div className="flex gap-4">
-          {categories.map((cat) => {
-            return (
-              <button
-                className="bg-gray-300 py-2 px-4 rounded-md text-black active:scale-105 hover:bg-zinc-400 transition-all ease-in"
-                key={cat}
-                onClick={() => dispatch(setSelectedCategory(cat))}
-              >
-                {cat}
-              </button>
-            );
-          })}
-        </div>
+      <div className="container mx-auto px-4">
+        <div className="flex flex-wrap items-center justify-between gap-2 my-2">
+          <div className="flex gap-4">
+            {categories.map((cat) => {
+              return (
+                <button
+                  className="bg-gray-300 py-2 px-4 rounded-md text-black active:scale-105 hover:bg-zinc-400 transition-all ease-in"
+                  key={cat}
+                  onClick={() => dispatch(setSelectedCategory(cat))}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
 
-        <div className="flex items-center gap-2 mx-2 my-2">
-          <label htmlFor="sort" className="font-medium">Sort:</label>
-          <select
-            id="sort"
-            value={sortOption}
-            onChange={handleSortChange}
-            className="border rounded-md p-2"
-          >
-            <option value="name-asc">A → Z</option>
-            <option value="name-desc">Z → A</option>
-            <option value="price-asc">Low → High</option>
-            <option value="price-desc">High → Low</option>
-          </select>
+          <div className="flex items-center gap-2 my-2">
+            <label htmlFor="sort" className="font-medium">Sort:</label>
+            <select
+              id="sort"
+              value={sortOption}
+              onChange={handleSortChange}
+              className="border rounded-md p-2"
+            >
+              <option value="name-asc">A → Z</option>
+              <option value="name-desc">Z → A</option>
+              <option value="price-asc">Low → High</option>
+              <option value="price-desc">High → Low</option>
+            </select>
+          </div>
         </div>
+        <ProductGrid sortOption={sortOption} />
       </div>
-
-      <ProductGrid sortOption={sortOption} />
-
+      
       {/* Footer */}
       <Footer />
     </div>

@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Eye, EyeOff, User, Mail, Phone, MapPin, Lock } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setLoggedIn, setAuthError, clearAuthError } from '../features/Auth/authSlice';
+import PropTypes from 'prop-types';
 
 const AuthForms = ({ onClose }) => {
   const dispatch = useDispatch();
@@ -574,6 +575,10 @@ const AuthForms = ({ onClose }) => {
       </div>
     </div>
   );
+};
+
+AuthForms.propTypes = {
+  onClose: PropTypes.func.isRequired
 };
 
 export default AuthForms;

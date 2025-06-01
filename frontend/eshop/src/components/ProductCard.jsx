@@ -1,5 +1,15 @@
 import { Link } from "react-router-dom";
-import React from "react";
+import PropTypes from "prop-types";
+
+ProductCard.propTypes = {
+  product: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    name: PropTypes.string,
+    imageUrl: PropTypes.string,
+    description: PropTypes.string,
+    price: PropTypes.number.isRequired,
+  }).isRequired,
+};
 
 function ProductCard({ product }) {
   return (
@@ -9,6 +19,7 @@ function ProductCard({ product }) {
           src={product.imageUrl}
           alt={product.name ?? "Product Image"}
           className="w-full overflow-hidden"
+          loading="lazy"
         />
 
         <div className="bg-gray-50 p-4">

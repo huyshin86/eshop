@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 
 const UnauthorizedPage = () => {
@@ -10,7 +9,7 @@ const UnauthorizedPage = () => {
           Unauthorized Access
         </h2>
         <p className="text-gray-600 mb-6">
-          Sorry, you don't have permission to access this page.
+          Sorry, you don&#39;t have permission to access this page.
         </p>
         <Link
           to="/"

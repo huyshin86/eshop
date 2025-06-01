@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+
 
 const FieldError = ({ field, errors }) => {
   return errors?.[field] ? (
@@ -41,7 +43,7 @@ const Profile = () => {
       } else {
         setError(result.message);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load user details');
     } finally {
       setLoading(false);
@@ -88,7 +90,7 @@ const Profile = () => {
           fieldErrors: result.errors || {}
         });
       }
-    } catch (err) {
+    } catch {
       setSaveStatus({ loading: false, error: 'Failed to update profile', fieldErrors: {} });
     }
   };
@@ -210,6 +212,22 @@ const Profile = () => {
       </div>
     </div>
   );
+};
+
+Profile.propTypes = {
+  userDetails: PropTypes.shape({
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+    email: PropTypes.string,
+    phoneNumber: PropTypes.string,
+    address: PropTypes.string
+  })
+
+};
+
+FieldError.propTypes = {
+  field: PropTypes.string.isRequired,
+  errors: PropTypes.object
 };
 
 export default Profile;

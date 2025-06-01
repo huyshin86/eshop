@@ -1,7 +1,5 @@
 //TODO: Create a dashboard page for the admin with stats, recent orders, and latest products
 
-import React from 'react';
-import { Link } from 'react-router-dom';
 import { ShoppingBag, Users, Package, DollarSign } from 'lucide-react';
 
 const Dashboard = () => {

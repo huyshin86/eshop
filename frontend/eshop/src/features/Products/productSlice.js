@@ -1,18 +1,40 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
+//import axios from "axios";
 
 // Fetch from backend
+// export const fetchProducts = createAsyncThunk(
+//   "products/fetchProducts",
+//   async (_, thunkAPI) => {
+//     try {
+//       const response = await axios.get("/api/products");
+//       return response.data.content;
+//     } catch (error) {
+//       return thunkAPI.rejectWithValue(error.response?.data || error.message);
+//     }
+//   }
+// );
+
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/products");
-      return response.data.content;
+      const response = await fetch("/api/products", {
+        credentials: "include",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        return thunkAPI.rejectWithValue(result || "Failed to fetch products");
+      }
+
+      return result.content;
     } catch (error) {
-      return thunkAPI.rejectWithValue(error.response?.data || error.message);
+      return thunkAPI.rejectWithValue(error.message || "Network error");
     }
   }
 );
+
 
 const initialState = {
   items: [],

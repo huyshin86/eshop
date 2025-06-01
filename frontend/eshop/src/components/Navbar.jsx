@@ -1,5 +1,5 @@
-import { ShoppingCart, User, Search } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import { ShoppingCart, User } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../assets/imgs/showcase/logo.svg";
 import { useDispatch, useSelector } from "react-redux";
