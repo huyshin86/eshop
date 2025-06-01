@@ -53,8 +53,8 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<Product> searchProducts(String searchTerm, Pageable pageable) {
         log.debug("Searching products with term: {} and pagination: {}", searchTerm, pageable);
-        return productRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-                searchTerm, searchTerm, pageable);
+        return productRepository.findByProductNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+                searchTerm, pageable);
     }
 
     @Transactional(readOnly = true)
@@ -79,7 +79,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> getFeaturedProducts() {
         log.debug("Fetching featured products");
-        return productRepository.findTop8ByOrderByIdDesc();
+        return productRepository.findTop8ByOrderByProductIdDesc();
     }
 
     @Transactional(readOnly = true)

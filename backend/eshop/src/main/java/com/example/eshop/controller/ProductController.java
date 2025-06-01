@@ -46,7 +46,11 @@ public class ProductController {
         log.debug("Fetching products - page: {}, size: {}, categoryId: {}, minPrice: {}, maxPrice: {}, search: {}", 
                 page, size, categoryId, minPrice, maxPrice, search);
 
-        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Sort sort = Sort.by(
+    sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC,
+    mapSortField(sortBy)
+);
+
         Pageable pageable = PageRequest.of(page, size, sort);
         
         Page<Product> productPage;
@@ -100,7 +104,11 @@ public class ProductController {
         
         log.debug("Fetching products by category id: {} with pagination", categoryId);
         
-        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Sort sort = Sort.by(
+    sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC,
+    mapSortField(sortBy)
+);
+
         Pageable pageable = PageRequest.of(page, size, sort);
         
         Page<Product> productPage = productService.getProductsByCategory(categoryId, pageable);
@@ -119,7 +127,11 @@ public class ProductController {
         
         log.debug("Searching products with term: {}", q);
         
-        Sort sort = Sort.by(sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC, sortBy);
+        Sort sort = Sort.by(
+    sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC,
+    mapSortField(sortBy)
+);
+
         Pageable pageable = PageRequest.of(page, size, sort);
         
         Page<Product> productPage = productService.searchProducts(q, pageable);
@@ -164,5 +176,17 @@ public class ProductController {
         log.debug("Checking stock for product id: {} with quantity: {}", id, quantity);
         boolean inStock = productService.isProductInStock(id, quantity);
         return ResponseEntity.ok(inStock);
+    }
+
+    // Private helper methods
+    private String mapSortField(String requestedSortField) {
+        return switch (requestedSortField) {
+            case "id" -> "productId";
+            case "name" -> "productName";
+            case "price" -> "price";
+            case "createdAt" -> "createdAt";
+            case "updatedAt" -> "updatedAt";
+            default -> "productId"; // fallback
+        };
     }
 }

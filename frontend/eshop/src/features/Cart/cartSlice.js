@@ -77,12 +77,60 @@ export const removeFromCartAsync = createAsyncThunk(
   }
 );
 
+export const initiateCheckout = createAsyncThunk(
+  'cart/initiateCheckout',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/checkout/initialize', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to initialize checkout');
+      }
+
+      // Extract PayPal details from response
+      const paypalDetails = result.data?.payPalOrderDetailDto;
+      if (!paypalDetails?.approvalUrl || !paypalDetails?.paypalOrderId) {
+        throw new Error('Invalid checkout response');
+      }
+
+      return paypalDetails.approvalUrl;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const clearCartAsync = createAsyncThunk(
+  'cart/clearCartAsync',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await fetch('/api/cart', {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to clear cart');
+      }
+
+      return true;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const initialState = {
   items: [],
   totalPrice: 0,
   loading: false,
   error: null,
-  isInitialized: false
+  isInitialized: false,
 };
 
 // Helper function to calculate total price
@@ -96,7 +144,7 @@ const calculateTotalPrice = (items) => {
 // Helper function to normalize cart items for consistent structure
 const normalizeCartItems = (items, isFromServer = false) => {
   if (!Array.isArray(items)) return [];
-  
+
   return items.map(item => {
     if (isFromServer) {
       // Server response format
@@ -181,7 +229,7 @@ const cartSlice = createSlice({
       .addCase(fetchCart.fulfilled, (state, action) => {
         state.loading = false;
         state.isInitialized = true;
-        
+
         if (action.payload && action.payload.items) {
           state.items = normalizeCartItems(action.payload.items, true);
           state.totalPrice = action.payload.totalPrice || calculateTotalPrice(state.items);
@@ -204,7 +252,7 @@ const cartSlice = createSlice({
       })
       .addCase(addToCartAsync.fulfilled, (state, action) => {
         state.loading = false;
-        
+
         if (action.payload && action.payload.items) {
           // Server returned updated cart
           state.items = normalizeCartItems(action.payload.items, true);
@@ -236,14 +284,14 @@ const cartSlice = createSlice({
       })
       .addCase(updateCartQuantityAsync.fulfilled, (state, action) => {
         state.loading = false;
-        
+
         if (action.payload && action.payload.items) {
           // Server returned updated cart
           state.items = normalizeCartItems(action.payload.items, true);
           state.totalPrice = action.payload.totalPrice || calculateTotalPrice(state.items);
         } else {
           // Fallback: update locally
-          const item = state.items.find((item) => 
+          const item = state.items.find((item) =>
             item.cartItemId === action.meta.arg.id || item.id === action.meta.arg.id
           );
           if (item) {
@@ -265,14 +313,14 @@ const cartSlice = createSlice({
       })
       .addCase(removeFromCartAsync.fulfilled, (state, action) => {
         state.loading = false;
-        
+
         if (action.payload && action.payload.items) {
           // Server returned updated cart
           state.items = normalizeCartItems(action.payload.items, true);
           state.totalPrice = action.payload.totalPrice || calculateTotalPrice(state.items);
         } else {
           // Fallback: update locally
-          state.items = state.items.filter((item) => 
+          state.items = state.items.filter((item) =>
             item.cartItemId !== action.meta.arg && item.id !== action.meta.arg
           );
           state.totalPrice = calculateTotalPrice(state.items);
@@ -289,9 +337,23 @@ const cartSlice = createSlice({
         state.totalPrice = 0;
         state.loading = false;
         state.error = null;
+      })
+
+      // Initiate Checkout
+      .addCase(initiateCheckout.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(initiateCheckout.fulfilled, (state) => {
+        state.loading = false;
+        state.error = null;
+      })
+      .addCase(initiateCheckout.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   }
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart, clearError } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateQuantity, clearCart, clearError,  } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -15,23 +15,26 @@ import java.util.List;
 
 @Repository
 public interface ProductJpaRepository extends JpaRepository<Product, Long> {
-    
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM Product p WHERE p.productId IN :ids")
     List<Product> findAllByIdForUpdate(@Param("ids") List<Long> ids);
-    
+
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
-    
-    Page<Product> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
-            String name, String description, Pageable pageable);
-    
+
+    @Query("SELECT p FROM Product p WHERE " +
+            "UPPER(p.productName) LIKE UPPER(CONCAT('%', :searchTerm, '%')) OR " +
+            "p.description LIKE CONCAT('%', :searchTerm, '%')")
+    Page<Product> findByProductNameContainingIgnoreCaseOrDescriptionContainingIgnoreCase(
+            @Param("searchTerm") String searchTerm, Pageable pageable);
+
     Page<Product> findByPriceBetween(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
-    
-    Page<Product> findByCategoryIdAndPriceBetween(Long categoryId, BigDecimal minPrice, 
+
+    Page<Product> findByCategoryIdAndPriceBetween(Long categoryId, BigDecimal minPrice,
                                                   BigDecimal maxPrice, Pageable pageable);
-    
-    List<Product> findTop8ByOrderByIdDesc();
-    
+
+    List<Product> findTop8ByOrderByProductIdDesc();
+
     @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId")
     List<Product> findByCategoryId(@Param("categoryId") Long categoryId);
 }

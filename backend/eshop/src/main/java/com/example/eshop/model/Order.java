@@ -93,7 +93,7 @@ public class Order {
     private LocalDateTime paymentCapturedAt;
 
     public enum OrderStatus {
-        PENDING, PROCESSING, SHIPPED, DELIVERED, MANUAL_REVIEW_PAYMENT, PAYMENT_STATUS_UNKNOWN, CANCELLED
+        PENDING, PROCESSING, SHIPPED, DELIVERED, MANUAL_REVIEW_PAYMENT, EXPIRED, CANCELLED
     }
 
     // Helper method to add an order item and maintain bidirectional consistency
