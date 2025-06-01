@@ -1,7 +1,6 @@
-//TODO: Create a dashboard page for the admin with stats, recent orders, and latest products
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "@/redux/slices/productSlice";
+import { fetchProducts } from "../../features/Products/productSlice";
 import { ShoppingBag, Users, Package, DollarSign } from 'lucide-react';
 
 const Dashboard = () => {
