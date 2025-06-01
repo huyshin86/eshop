@@ -10,9 +10,7 @@ const buildQueryString = (params) => {
   return query.toString();
 };
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:8080";
 // Fetch products for the home page
-
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (params = {}, thunkAPI) => {
@@ -67,7 +65,7 @@ export const fetchAdminProducts = createAsyncThunk(
   async ({ page = 0, size = 10 } = {}, thunkAPI) => {
     try {
       const res = await fetch(
-        `${API_BASE}/api/admin/products?page=${page}&size=${size}`,
+        `/api/admin/products?page=${page}&size=${size}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -92,7 +90,7 @@ export const createAdminProduct = createAsyncThunk(
   "products/createAdminProduct",
   async (formData, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/products`, {
+      const res = await fetch(`/api/admin/products`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -115,7 +113,7 @@ export const updateAdminProduct = createAsyncThunk(
   "products/updateAdminProduct",
   async ({ id, formData }, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/products/${id}`, {
+      const res = await fetch(`/api/admin/products/${id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -138,7 +136,7 @@ export const deleteAdminProduct = createAsyncThunk(
   "products/deleteAdminProduct",
   async (id, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/products/${id}`, {
+      const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -160,7 +158,7 @@ export const updateAdminProductStock = createAsyncThunk(
   "products/updateAdminProductStock",
   async ({ id, stock }, thunkAPI) => {
     try {
-      const res = await fetch(`${API_BASE}/api/admin/products/${id}/stock`, {
+      const res = await fetch(`/api/admin/products/${id}/stock`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
