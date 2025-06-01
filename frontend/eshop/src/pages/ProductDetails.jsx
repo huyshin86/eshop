@@ -1,15 +1,28 @@
 import { useParams, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { ShoppingCart } from "lucide-react";
-import { addToCart } from "../features/Cart/cartSlice";
+import { addToCart, addToCartAsync } from "../features/Cart/cartSlice";
 
 function ProductDetails() {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
   const product = useSelector((state) =>
     state.product.items.find((p) => p.id === parseInt(id))
   );
+
+  const handleAddToCart = async () => {
+    if (isAuthenticated) {
+      try {
+        await dispatch(addToCartAsync(product)).unwrap();
+      } catch (error) {
+        console.error('Failed to add to cart:', error);
+      }
+    } else {
+      dispatch(addToCart(product));
+    }
+  };
 
   if (!product) {
     return (
@@ -56,7 +69,7 @@ function ProductDetails() {
 
             <button
               className="w-full md:w-auto bg-zinc-200 px-8 py-3 rounded-md flex items-center justify-center gap-2 hover:bg-zinc-300 active:scale-105 transition-all ease-in"
-              onClick={() => dispatch(addToCart(product))}
+              onClick={handleAddToCart}
             >
               <ShoppingCart size={20} />
               Add to Cart

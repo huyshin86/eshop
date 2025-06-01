@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./App/store";
@@ -8,32 +7,52 @@ import AdminRoutes from "./routes/AdminRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { fetchCart } from "./features/Cart/cartSlice";
 
+// Create a separate component for the app content
+function AppContent() {
+  const dispatch = useDispatch();
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchCart());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  return (
+    <BrowserRouter>
+      <Navbar />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/*" element={<PublicRoutes />} />
+        
+        {/* Protected routes */}
+        <Route path="/customer/*" element={
+          <ProtectedRoute allowedRoles={['CUSTOMER']}>
+            <CustomerRoutes />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/*" element={
+          <ProtectedRoute allowedRoles={['ADMIN']}>
+            <AdminRoutes />
+          </ProtectedRoute>
+        } />
+        
+        {/* Unauthorized access page */}
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+// Main App component
 function App() {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          {/* Public routes */}
-          <Route path="/*" element={<PublicRoutes />} />
-          
-          {/* Protected routes */}
-          <Route path="/customer/*" element={
-            <ProtectedRoute allowedRoles={['CUSTOMER']}>
-              <CustomerRoutes />
-            </ProtectedRoute>
-          } />
-          <Route path="/admin/*" element={
-            <ProtectedRoute allowedRoles={['ADMIN']}>
-              <AdminRoutes />
-            </ProtectedRoute>
-          } />
-          
-          {/* Unauthorized access page */}
-          <Route path="/unauthorized" element={<UnauthorizedPage />} />
-        </Routes>
-      </BrowserRouter>
+      <AppContent />
     </Provider>
   );
 }
