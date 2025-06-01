@@ -1,36 +1,21 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-//import axios from "axios";
-
-// Fetch from backend
-// export const fetchProducts = createAsyncThunk(
-//   "products/fetchProducts",
-//   async (_, thunkAPI) => {
-//     try {
-//       const response = await axios.get("/api/products");
-//       return response.data.content;
-//     } catch (error) {
-//       return thunkAPI.rejectWithValue(error.response?.data || error.message);
-//     }
-//   }
-// );
 
 export const fetchProducts = createAsyncThunk(
   "products/fetchProducts",
   async (_, thunkAPI) => {
     try {
-      const response = await fetch("/api/products", {
-        credentials: "include",
-      });
+      const response = await fetch("/api/products");
 
       const result = await response.json();
 
       if (!response.ok) {
-        return thunkAPI.rejectWithValue(result || "Failed to fetch products");
+        const errorMessage = result?.message || result?.error || "Failed to fetch products";
+        return thunkAPI.rejectWithValue(errorMessage);
       }
 
       return result.content;
-    } catch (error) {
-      return thunkAPI.rejectWithValue(error.message || "Network error");
+    } catch {
+      return thunkAPI.rejectWithValue("Network error");
     }
   }
 );
@@ -43,6 +28,7 @@ const initialState = {
   selectedCategory: "All",
   loading: false,
   error: null,
+  showError: false,
 };
 
 const filterProducts = (state) => {
@@ -90,26 +76,33 @@ const productSlice = createSlice({
       state.selectedCategory = action.payload;
       state.filteredItems = filterProducts(state);
     },
+    clearError: (state) => {
+      state.error = null;
+      state.showError = false;
+    }
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.showError = false;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload || [];
         state.filteredItems = filterProducts(state);
+        state.showError = false;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch products";
+        state.showError = true;
         state.items = [];
         state.filteredItems = [];
       });
   },
 });
 
-export const { setSearchTerm, setSelectedCategory } = productSlice.actions;
+export const { setSearchTerm, setSelectedCategory, clearError } = productSlice.actions;
 export default productSlice.reducer;

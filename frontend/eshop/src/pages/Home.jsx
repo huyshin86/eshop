@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import Footer from "../components/Footer";
 import ProductGrid from "../components/ProductGrid";
-import { useDispatch } from "react-redux";
-import { fetchProducts, setSelectedCategory } from "../features/Products/productSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts, setSelectedCategory, clearError } from "../features/Products/productSlice";
+import { AlertCircle, X } from 'lucide-react';
 
 const categories = [
   "All",
@@ -16,6 +17,8 @@ function Home() {
   const dispatch = useDispatch();
   const [sortOption, setSortOption] = useState("name-asc");
 
+  const { error, showError } = useSelector((state) => state.product);
+
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
@@ -27,6 +30,25 @@ function Home() {
 
   return (
     <div>
+      {/* Show error alert in the middle */}
+      {showError && error && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
+          <div className="mx-auto max-w-md bg-red-50 border border-red-200 rounded-md p-4 shadow-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <AlertCircle className="text-red-500 mr-2" size={20} />
+                <span className="text-red-700">{error}</span>
+              </div>
+              <button
+                onClick={() => dispatch(clearError())}
+                className="text-red-500 hover:text-red-700"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="bg flex justify-center items-center"></div>
       <div className="container mx-auto px-4">
         <div className="flex flex-wrap items-center justify-between gap-2 my-2">
@@ -61,7 +83,7 @@ function Home() {
         </div>
         <ProductGrid sortOption={sortOption} />
       </div>
-      
+
       {/* Footer */}
       <Footer />
     </div>
