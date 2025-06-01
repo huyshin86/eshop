@@ -139,6 +139,7 @@ public class PayPalService {
         // Build purchase unit
         PurchaseUnitRequest purchaseUnit = new PurchaseUnitRequest.Builder(amount)
                 .referenceId(businessOrder.getOrderNumber())
+                .invoiceId(businessOrder.getOrderNumber())
                 .description("Order #" + businessOrder.getOrderNumber() + " from E-Shop")
                 .items(paypalItems)
                 .shipping(buildShippingDetail(businessOrder))

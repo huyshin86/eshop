@@ -295,7 +295,7 @@ public class OrderService {
             order.addOrderItem(orderItem);
         }
 
-        BigDecimal shipping = BigDecimal.valueOf(5);
+        BigDecimal shipping = BigDecimal.valueOf(20);
         BigDecimal tax = subtotal.multiply(BigDecimal.valueOf(0.1));
         BigDecimal grandTotal = subtotal.add(shipping).add(tax);
 
