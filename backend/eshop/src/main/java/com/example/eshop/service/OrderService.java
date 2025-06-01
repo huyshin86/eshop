@@ -83,6 +83,12 @@ public class OrderService {
         Order businessOrder = orderRepo.findByPaypalOrderId(paypalOrderId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found for PayPal ID: " + paypalOrderId));
 
+        if (businessOrder.getOrderStatus() == Order.OrderStatus.PROCESSING) {
+            log.info("Order with PayPal ID: {} is already in {} state. Returning success.",
+                    paypalOrderId, businessOrder.getOrderStatus());
+            return toOrderResponseDto(businessOrder);
+        }
+
         if (businessOrder.getOrderStatus() != Order.OrderStatus.PENDING) {
             throw new IllegalStateException("Order is not in pending state: " + businessOrder.getOrderNumber());
         }
@@ -150,12 +156,12 @@ public class OrderService {
     @Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
     protected void processSingleStaleOrder(Order order) {
         String paypalOrderId = order.getPaypalOrderId();
+        LocalDateTime orderTime = order.getCreatedAt();
+        boolean isExpired = orderTime.isBefore(LocalDateTime.now().minusHours(3));
 
         if (paypalOrderId == null || paypalOrderId.isBlank()) {
             log.warn("Stale PENDING order {} has no PayPal ID. Marking as CANCELLED.", order.getOrderNumber());
-            rollbackInventory(order);
-            order.setOrderStatus(Order.OrderStatus.CANCELLED);
-            orderRepo.save(order);
+            doCancelOrder(order);
             return;
         }
 
@@ -183,17 +189,23 @@ public class OrderService {
                 log.info("Order {} (PayPal ID: {}) has final PayPal status {}. Cancelling locally.",
                         order.getOrderNumber(), paypalOrderId, payPalStatus);
                 doCancelOrder(order);
+            } else if (isExpired) {
+                log.warn("Order {} is older than 3 hours with PayPal status {}. Marking as EXPIRED and cancelling.",
+                        order.getOrderNumber(), payPalStatus);
+                order.setOrderStatus(Order.OrderStatus.EXPIRED);
+                rollbackInventory(order);
+                orderRepo.save(order);
             } else {
                 // PayPal status is CREATED, PENDING, or ambiguous no cancel yet
                 log.warn("Order {} (PayPal ID: {}) has ambiguous PayPal status {}. Retaining for next cycle.",
                         order.getOrderNumber(), paypalOrderId, payPalStatus);
             }
         } catch (PaymentProcessingException e) {
-            LocalDateTime orderTime = order.getCreatedAt();
-            if (orderTime.isBefore(LocalDateTime.now().minusHours(3))) {
+            if (isExpired) {
                 log.warn("Order {} is older than 3 hours and PayPal status could not be retrieved. Marking as EXPIRED.",
                         order.getOrderNumber());
-                order.setOrderStatus(Order.OrderStatus.PAYMENT_STATUS_UNKNOWN);
+                order.setOrderStatus(Order.OrderStatus.EXPIRED);
+                rollbackInventory(order);
                 orderRepo.save(order);
             } else {
                 log.error("Failed to retrieve PayPal status for order {}: {}. Will retry next cycle.",

@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../assets/imgs/showcase/logo.svg";
 import { useDispatch, useSelector } from "react-redux";
-import { setSearchTerm } from "../features/Products/productSlice";
+import { setSearchTerm, fetchProducts } from "../features/Products/productSlice";
 import AuthForms from "../pages/AuthForms";
 import ReactDOM from "react-dom";
 import {
@@ -60,22 +60,22 @@ function Navbar() {
     if (isLoadingAuth || isLoggingOut) return;
 
     setIsLoggingOut(true);
-    
+
     try {
       // Close dropdown immediately and clear search
       setIsUserDropdownOpen(false);
       dispatch(setSearchTerm(''));
-      
+
       // Check if we're on a protected route before logout
-      const isProtectedRoute = location.pathname.startsWith('/admin') || 
-                              location.pathname.startsWith('/customer');
-      
+      const isProtectedRoute = location.pathname.startsWith('/admin') ||
+        location.pathname.startsWith('/customer');
+
       // Perform logout
       const resultAction = await dispatch(performLogout());
 
       if (performLogout.fulfilled.match(resultAction)) {
         console.log('Logout successful:', resultAction.payload);
-        
+
         // Navigate away from protected routes after successful logout
         if (isProtectedRoute) {
           // Add a small delay to ensure state is updated
@@ -92,6 +92,21 @@ function Navbar() {
     } finally {
       setIsLoggingOut(false);
     }
+  };
+
+  const handleSearch = (e) => {
+    if (e.type === 'submit') {
+      e.preventDefault(); // Prevent form submission refresh
+      dispatch(fetchProducts());
+      return;
+    }
+
+    dispatch(setSearchTerm(e.target.value));
+    // Debounce search for onChange
+    const timeoutId = setTimeout(() => {
+      dispatch(fetchProducts());
+    }, 300);
+    return () => clearTimeout(timeoutId);
   };
 
   const renderUserDropdown = () => {
@@ -116,7 +131,7 @@ function Navbar() {
         </li>
       );
     }
-    
+
     return (
       <>
         {isAdmin ? (
@@ -215,7 +230,7 @@ function Navbar() {
     const checkAuthStatusAndFetchRole = async () => {
       // Don't run this check if we're currently logging out
       if (isLoggingOut) return;
-      
+
       if (!isAuthenticated) {
         try {
           const response = await fetch('/api/auth/user-role', {
@@ -246,7 +261,7 @@ function Navbar() {
         }
       }
     };
-    
+
     checkAuthStatusAndFetchRole();
   }, [dispatch, isAuthenticated, isLoggingOut]);
 
@@ -277,7 +292,7 @@ function Navbar() {
             {/* Admin Navigation */}
             {isAdmin && <AdminNav />}
           </div>
-          
+
           {/* User Menu */}
           <div className="relative" ref={userDropdownRef}>
             <button
@@ -287,19 +302,18 @@ function Navbar() {
             >
               <User size={24} />
               <span className="text-sm">
-                {isLoggingOut 
-                  ? 'Signing Out...' 
-                  : isAuthenticated 
-                    ? (isAdmin ? 'Admin' : 'Account') 
+                {isLoggingOut
+                  ? 'Signing Out...'
+                  : isAuthenticated
+                    ? (isAdmin ? 'Admin' : 'Account')
                     : 'Sign In'
                 }
               </span>
             </button>
 
             <div
-              className={`flex flex-col absolute right-0 md:right-0 top-12 z-20 bg-white shadow-lg border rounded-md p-4 gap-4 min-w-[150px] ${
-                isUserDropdownOpen ? "block" : "hidden"
-              }`}
+              className={`flex flex-col absolute right-0 md:right-0 top-12 z-20 bg-white shadow-lg border rounded-md p-4 gap-4 min-w-[150px] ${isUserDropdownOpen ? "block" : "hidden"
+                }`}
             >
               {renderUserDropdown()}
             </div>
@@ -315,13 +329,13 @@ function Navbar() {
         </div>
 
         {/* Desktop Search */}
-        <form className="hidden md:block w-1/2" onSubmit={(e) => e.preventDefault()}>
+        <form className="hidden md:block w-1/2" onSubmit={handleSearch}>
           <input
             type="text"
             placeholder="Search Product"
             className="bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent py-3 px-3 w-full transition-all"
             value={searchTerm}
-            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+            onChange={handleSearch}
           />
         </form>
 
@@ -339,13 +353,13 @@ function Navbar() {
 
       {/* Mobile Search Bar - Always visible on mobile */}
       <div className="md:hidden px-4 py-3 border-t">
-        <form onSubmit={(e) => e.preventDefault()}>
+        <form onSubmit={handleSearch}>
           <input
             type="text"
             placeholder="Search Product"
             className="w-full bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 transition-all"
             value={searchTerm}
-            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
+            onChange={handleSearch}
           />
         </form>
       </div>

@@ -10,6 +10,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { fetchCart } from "./features/Cart/cartSlice";
+import PayPalCallback from './pages/checkout/PayPalCallback';
+import CheckoutSuccess from './pages/checkout/CheckoutSuccess';
+import CheckoutError from './pages/checkout/CheckoutError';
 
 // Create a separate component for the app content
 function AppContent() {
@@ -43,6 +46,10 @@ function AppContent() {
         
         {/* Unauthorized access page */}
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+
+        <Route path="/paypal/callback" element={<PayPalCallback />} />
+        <Route path="/checkout/success" element={<CheckoutSuccess />} />
+        <Route path="/checkout/error" element={<CheckoutError />} />
       </Routes>
     </BrowserRouter>
   );

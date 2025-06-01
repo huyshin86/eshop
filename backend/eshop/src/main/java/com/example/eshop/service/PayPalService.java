@@ -11,6 +11,7 @@ import com.example.eshop.model.OrderItem;
 import com.example.eshop.exception.PaymentProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -26,6 +27,9 @@ import java.util.stream.Collectors;
 public class PayPalService {
 
     private final PaypalServerSdkClient paypalClient;
+
+    @Value("${app.frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     private static final int PAYPAL_DECIMAL_SCALE = 2;
     private static final RoundingMode PAYPAL_ROUNDING_MODE = RoundingMode.HALF_UP;
@@ -145,11 +149,17 @@ public class PayPalService {
                 .shipping(buildShippingDetail(businessOrder))
                 .build();
 
+        OrderApplicationContext  applicationContext = new OrderApplicationContext.Builder()
+                .returnUrl(frontendUrl + "/paypal/callback?success=true")
+                .cancelUrl(frontendUrl + "/paypal/callback?cancel=true")
+                .brandName("E-Shop")
+                .build();
+
         // Build order request
         OrderRequest orderRequest = new OrderRequest.Builder(
                 CheckoutPaymentIntent.CAPTURE,
                 Collections.singletonList(purchaseUnit)
-        ).build();
+        ).applicationContext(applicationContext).build();
 
         return new CreateOrderInput.Builder(null, orderRequest).build();
     }

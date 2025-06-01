@@ -1,8 +1,10 @@
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { Trash2, Plus, Minus, AlertCircle, Loader2 } from "lucide-react";
-import { removeFromCart, updateQuantity, removeFromCartAsync, updateCartQuantityAsync, clearError } from "../features/Cart/cartSlice";
-import { useEffect, useRef } from 'react';
+import { removeFromCart, updateQuantity, removeFromCartAsync, updateCartQuantityAsync, clearError, initiateCheckout } from "../features/Cart/cartSlice";
+import { useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import AuthForms from '../pages/AuthForms';
 
 function CartPage() {
   const navigate = useNavigate();
@@ -10,6 +12,7 @@ function CartPage() {
   const { items: cartItems, loading, error, totalPrice } = useSelector((state) => state.cart);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const wasAuthenticated = useRef(isAuthenticated);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     if (wasAuthenticated.current && !isAuthenticated) {
@@ -17,7 +20,7 @@ function CartPage() {
     }
     wasAuthenticated.current = isAuthenticated;
   }, [isAuthenticated, navigate]);
-  
+
   // Calculate totals
   const subtotal = totalPrice || cartItems.reduce((sum, item) => {
     const price = item.price || 0;
@@ -61,6 +64,28 @@ function CartPage() {
     dispatch(clearError());
   };
 
+  const handleCheckout = async () => {
+    try {
+      if (!isAuthenticated) {
+        setShowAuthModal(true);
+        return;
+      }
+
+      const approvalUrl = await dispatch(initiateCheckout()).unwrap();
+
+      // If successful, redirect to the payment URL
+      if (approvalUrl) {
+        window.location.href = approvalUrl;
+      }
+    } catch (error) {
+      console.error('Checkout failed:', error);
+    }
+  };
+
+  const handleCloseAuthModal = () => {
+    setShowAuthModal(false);
+  };
+
   // Loading state
   if (loading && cartItems.length === 0) {
     return (
@@ -95,8 +120,24 @@ function CartPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {showAuthModal &&
+        ReactDOM.createPortal(
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+            onClick={handleCloseAuthModal}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-white rounded-xl shadow-xl p-6 w-[95%] max-w-md sm:p-8 max-h-[90vh] overflow-y-auto"
+            >
+              <AuthForms onClose={handleCloseAuthModal} />
+            </div>
+          </div>,
+          document.body
+        )}
+
       <h2 className="text-2xl font-bold mb-8">Shopping Cart</h2>
-      
+
       {/* Error Message */}
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-md p-4 flex items-center justify-between">
@@ -121,7 +162,7 @@ function CartPage() {
               <Loader2 className="animate-spin" size={24} />
             </div>
           )}
-          
+
           {cartItems.map((item) => {
             if (!item) return null;
 
@@ -151,7 +192,7 @@ function CartPage() {
                     loading="lazy"
                   />
                 </Link>
-                
+
                 <div className="flex-1">
                   <Link
                     to={`/product/${productId}`}
@@ -160,11 +201,11 @@ function CartPage() {
                     {title}
                   </Link>
                   <p className="text-gray-600">${price.toFixed(2)}</p>
-                  
+
                   {!isAvailable && (
                     <p className="text-red-500 text-sm">Out of stock</p>
                   )}
-                  
+
                   <div className="flex items-center gap-2 mt-2">
                     <button
                       onClick={() => handleQuantityUpdate(itemId, quantity - 1)}
@@ -190,7 +231,7 @@ function CartPage() {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="text-right">
                   <p className="font-bold">
                     ${(price * quantity).toFixed(2)}
@@ -225,9 +266,10 @@ function CartPage() {
                 </div>
               </div>
             </div>
-            <button 
+            <button
               className="w-full bg-zinc-200 px-6 py-3 rounded-lg hover:bg-zinc-300 transition-colors disabled:opacity-50"
               disabled={loading || cartItems.some(item => !item.isAvailableInStock)}
+              onClick={handleCheckout}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -238,7 +280,7 @@ function CartPage() {
                 'Proceed to Checkout'
               )}
             </button>
-            
+
             {cartItems.some(item => !item.isAvailableInStock) && (
               <p className="text-red-500 text-sm mt-2 text-center">
                 Remove out-of-stock items to proceed
