@@ -1,5 +1,4 @@
-// src/pages/admin/ProductForm.jsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createAdminProduct,
@@ -8,6 +7,7 @@ import {
 } from "../../features/Products/productSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import { useMemo } from "react";
 
 export default function ProductForm() {
   const { id } = useParams();
@@ -16,9 +16,9 @@ export default function ProductForm() {
   const navigate = useNavigate();
 
   const { adminProducts, adminLoading, adminError } = useSelector(
-    (state) => state.products
+    (state) => state.product
   );
-  const productsList = adminProducts.content;
+  const productsList = useMemo(() => adminProducts?.content || [], [adminProducts]);
 
   // State form
   const [formData, setFormData] = useState({
@@ -26,11 +26,14 @@ export default function ProductForm() {
     description: "",
     price: "",
     stock: "",
-    category: "",
+    categoryId: 1, // Fixed to category ID 1 (Laptop)
+    isActive: true,
     imageFile: null,
   });
   const [previewUrl, setPreviewUrl] = useState(""); // để preview ảnh (khi edit, hoặc khi chọn ảnh mới)
   const [formError, setFormError] = useState(null);
+
+  const fixedCategory = { id: 1, name: "Laptop" };
 
   useEffect(() => {
     if (isEditing) {
@@ -43,8 +46,9 @@ export default function ProductForm() {
             name: prod.name || "",
             description: prod.description || "",
             price: prod.price || "",
-            stock: prod.stock || "",
-            category: prod.category || "",
+            stock: prod.stockQuantity || "",
+            categoryId: prod.categoryId || 1, // Default to category ID 1 if not set
+            isActive: prod.isActive !== undefined ? prod.isActive : true,
             imageFile: null,
           });
           setPreviewUrl(prod.imageUrl || "");
@@ -54,10 +58,10 @@ export default function ProductForm() {
   }, [isEditing, id, productsList, dispatch]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
@@ -80,7 +84,7 @@ export default function ProductForm() {
     e.preventDefault();
     setFormError(null);
 
-    if (!formData.name.trim() || !formData.price || !formData.stock || !formData.category) {
+    if (!formData.name.trim() || !formData.price || !formData.stock) {
       setFormError("Please fill in all required fields.");
       return;
     }
@@ -93,15 +97,17 @@ export default function ProductForm() {
     payload.append("name", formData.name);
     payload.append("description", formData.description);
     payload.append("price", formData.price);
-    payload.append("stock", formData.stock);
-    payload.append("category", formData.category);
+    payload.append("stockQuantity", formData.stock);
+    payload.append("categoryId", formData.categoryId);
+    payload.append("isActive", formData.isActive);
     if (formData.imageFile) {
       payload.append("imageFile", formData.imageFile);
     }
+    
     try {
       if (isEditing) {
         await dispatch(updateAdminProduct({ id, formData: payload })).unwrap();
-        alert("Update new product successfully!");
+        alert("Update product successfully!");
       } else {
         await dispatch(createAdminProduct(payload)).unwrap();
         alert("Create new product successfully!");
@@ -178,19 +184,31 @@ export default function ProductForm() {
           </div>
 
           <div>
-            <label className="block font-medium">Category *</label>
+            <label className="block font-medium">Category</label>
             <input
               type="text"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              placeholder="VD: Electronics, Clothing, ..."
-              className="mt-1 block w-full border rounded px-3 py-2"
+              value={fixedCategory.name}
+              disabled
+              className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-gray-600"
             />
+            <p className="text-sm text-gray-500 mt-1">Currently only supporting Laptop category</p>
           </div>
 
           <div>
-            <label className="block font-medium">Product's image {isEditing ? "(if change)" : "*"}</label>
+            <label className="flex items-center">
+              <input
+                type="checkbox"
+                name="isActive"
+                checked={formData.isActive}
+                onChange={handleChange}
+                className="mr-2"
+              />
+              <span className="font-medium">Product is active</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block font-medium">Product&apos;s image {isEditing ? "(if change)" : "*"}</label>
             <input
               type="file"
               accept="image/*"

@@ -6,7 +6,7 @@ import { ShoppingBag, Users, Package, DollarSign } from 'lucide-react';
 const Dashboard = () => {
   const dispatch = useDispatch();
   
-  const { items, loading, error } = useSelector((state) => state.products);
+  const { items, loading = false, error = null } = useSelector((state) => state.product);
 
   useEffect(() => {
     dispatch(fetchProducts());

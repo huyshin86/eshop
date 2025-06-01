@@ -39,6 +39,12 @@ function Navbar() {
   const isLoadingAuth = useSelector(selectAuthLoading);
   const logoutMessage = useSelector(selectLogoutMessage);
 
+  const shouldHideSearchBar = isAdmin && [
+  "/admin/products",
+  "/admin/dashboard",
+].includes(location.pathname);
+
+
   const handleUserIconClick = (e) => {
     e.stopPropagation();
     if (!isLoggingOut) {
@@ -329,15 +335,17 @@ function Navbar() {
         </div>
 
         {/* Desktop Search */}
-        <form className="hidden md:block w-1/2" onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Search Product"
-            className="bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent py-3 px-3 w-full transition-all"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </form>
+        {!shouldHideSearchBar && (
+          <form className="hidden md:block w-1/2" onSubmit={handleSearch}>
+            <input
+              type="text"
+              placeholder="Search Product"
+              className="bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent py-3 px-3 w-full transition-all"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </form>
+        )}
 
         <div className="relative">
           <Link to="/cart">
@@ -352,17 +360,19 @@ function Navbar() {
       </nav>
 
       {/* Mobile Search Bar - Always visible on mobile */}
-      <div className="md:hidden px-4 py-3 border-t">
-        <form onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Search Product"
-            className="w-full bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 transition-all"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </form>
-      </div>
+      {!shouldHideSearchBar && (
+        <div className="md:hidden px-4 py-3 border-t">
+          <form onSubmit={handleSearch}>
+            <input
+              type="text"
+              placeholder="Search Product"
+              className="w-full bg-zinc-100 rounded-md border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent py-2 px-3 transition-all"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+          </form>
+        </div>
+      )}
 
       {/* Auth Modal */}
       {showAuthModal &&
