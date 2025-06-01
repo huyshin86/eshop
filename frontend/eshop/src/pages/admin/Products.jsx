@@ -30,7 +30,7 @@ export default function Products() {
   }, [dispatch, page]);
 
   const handleDelete = (id) => {
-    if (window.confirm("Bạn có chắc muốn xóa sản phẩm này không?")) {
+    if (window.confirm("Are you sure you want to delete this product?")) {
       dispatch(deleteAdminProduct(id));
     }
   };
@@ -56,7 +56,7 @@ export default function Products() {
   const saveStock = (id) => {
     const newStock = parseInt(stockValue, 10);
     if (isNaN(newStock) || newStock < 0) {
-      alert("Stock phải là số không âm.");
+      alert("Stock must be a valid non-negative number.");
       return;
     }
     dispatch(updateAdminProductStock({ id, stock: newStock })).then(() => {
