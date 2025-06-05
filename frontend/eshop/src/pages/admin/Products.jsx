@@ -68,9 +68,18 @@ export default function Products() {
       alert("Stock must be a valid non-negative number.");
       return;
     }
-    dispatch(updateAdminProductStock({ id, stock: newStock })).then(() => {
+    dispatch(updateAdminProductStock({ id, stock: newStock }))
+    .unwrap()
+    .then(() => {
       setEditingStockId(null);
       setStockValue("");
+    })
+    .catch((err) => {
+      alert(
+        typeof err === "string"
+          ? err
+          : err?.message || "Failed to update stock. Please try again."
+      );
     });
   };
 

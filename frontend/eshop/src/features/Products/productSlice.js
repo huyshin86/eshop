@@ -158,14 +158,13 @@ export const updateAdminProductStock = createAsyncThunk(
   "products/updateAdminProductStock",
   async ({ id, stock }, thunkAPI) => {
     try {
-      const res = await fetch(`/api/admin/products/${id}/stock`, {
+      const res = await fetch(`/api/admin/products/${id}/stock?stockQuantity=${stock}`, {
         method: "PATCH",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ stock }),
       });
+
       const data = await res.json();
       if (!res.ok) {
         return thunkAPI.rejectWithValue(data || "Failed to update stock");
@@ -198,7 +197,7 @@ const filterProducts = (state) => {
     if (state.selectedCategory === "All") {
       return true;
     }
-    
+
     const productName = product.name.toLowerCase();
     const selectedBrand = state.selectedCategory.toLowerCase();
 
@@ -346,7 +345,7 @@ const productSlice = createSlice({
         state.adminLoading = false;
         state.adminError = action.payload;
       });
-    },
+  },
 });
 
 export const { setSearchTerm, setSelectedCategory, clearError } = productSlice.actions;

@@ -28,7 +28,7 @@ export default function ProductForm() {
     stock: "",
     categoryId: 1, // Fixed to category ID 1 (Laptop)
     isActive: true,
-    imageFile: null,
+    image: null,
   });
   const [previewUrl, setPreviewUrl] = useState(""); // để preview ảnh (khi edit, hoặc khi chọn ảnh mới)
   const [formError, setFormError] = useState(null);
@@ -49,7 +49,7 @@ export default function ProductForm() {
             stock: prod.stockQuantity || "",
             categoryId: prod.categoryId || 1, // Default to category ID 1 if not set
             isActive: prod.isActive !== undefined ? prod.isActive : true,
-            imageFile: null,
+            image: null,
           });
           setPreviewUrl(prod.imageUrl || "");
         }
@@ -69,7 +69,7 @@ export default function ProductForm() {
     const file = e.target.files[0];
     setFormData((prev) => ({
       ...prev,
-      imageFile: file,
+      image: file,
     }));
     if (file) {
       const reader = new FileReader();
@@ -88,7 +88,7 @@ export default function ProductForm() {
       setFormError("Please fill in all required fields.");
       return;
     }
-    if (!isEditing && !formData.imageFile) {
+    if (!isEditing && !formData.image) {
       setFormError("Please upload an image for the product.");
       return;
     }
@@ -100,8 +100,8 @@ export default function ProductForm() {
     payload.append("stockQuantity", formData.stock);
     payload.append("categoryId", formData.categoryId);
     payload.append("isActive", formData.isActive);
-    if (formData.imageFile) {
-      payload.append("imageFile", formData.imageFile);
+    if (formData.image) {
+      payload.append("image", formData.image);
     }
     
     try {

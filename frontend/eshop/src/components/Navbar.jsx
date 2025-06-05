@@ -142,7 +142,7 @@ function Navbar() {
       <>
         {isAdmin ? (
           <>
-            <li>
+            {/* <li>
               <Link
                 to="/admin/dashboard"
                 className="hover:text-blue-600 transition-colors"
@@ -150,7 +150,7 @@ function Navbar() {
               >
                 Admin Dashboard
               </Link>
-            </li>
+            </li> */}
             <li>
               <Link
                 to="/admin/products"
