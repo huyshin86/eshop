@@ -25,14 +25,6 @@ const PaymentMethodModal = ({ isOpen, onClose, onSelectPayment, loading }) => {
       ),
       available: true
     },
-    // Future payment methods can be added here
-    // {
-    //   id: 'stripe',
-    //   name: 'Credit Card',
-    //   description: 'Pay with Visa, Mastercard, or American Express',
-    //   icon: <CreditCard className="w-8 h-8 text-gray-600" />,
-    //   available: false
-    // }
   ];
 
   const handleContinue = () => {
