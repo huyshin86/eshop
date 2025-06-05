@@ -113,6 +113,9 @@ export const updateAdminProduct = createAsyncThunk(
   "products/updateAdminProduct",
   async ({ id, formData }, thunkAPI) => {
     try {
+      const isActive = formData.get("isActive") === "true";
+      formData.set("isActive", isActive);
+
       const res = await fetch(`/api/admin/products/${id}`, {
         method: "PUT",
         headers: {

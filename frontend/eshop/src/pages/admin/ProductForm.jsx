@@ -99,7 +99,7 @@ export default function ProductForm() {
     payload.append("price", formData.price);
     payload.append("stockQuantity", formData.stock);
     payload.append("categoryId", formData.categoryId);
-    payload.append("isActive", formData.isActive);
+    payload.append("isActive", String(formData.isActive));
     if (formData.image) {
       payload.append("image", formData.image);
     }

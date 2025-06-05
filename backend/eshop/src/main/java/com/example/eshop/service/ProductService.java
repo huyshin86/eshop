@@ -121,6 +121,7 @@ public class ProductService {
         existingProduct.setPrice(productDto.price());
         existingProduct.setStockQuantity(productDto.stockQuantity());
         existingProduct.setImageUrl(productDto.imageUrl());
+        existingProduct.setIsActive(productDto.isActive());
         existingProduct.setCategory(category);
         
         Product updatedProduct = productRepository.save(existingProduct);

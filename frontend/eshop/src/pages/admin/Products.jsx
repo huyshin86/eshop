@@ -31,7 +31,8 @@ export default function Products() {
     product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.id?.toString().includes(searchTerm) ||
-    product.stockQuantity?.toString().includes(searchTerm)
+    product.stockQuantity?.toString().includes(searchTerm) ||
+    (product.isActive ? "active" : "inactive").includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
@@ -62,25 +63,26 @@ export default function Products() {
     setStockValue("");
   };
 
-  const saveStock = (id) => {
+  const saveStock = async (id) => {
     const newStock = parseInt(stockValue, 10);
     if (isNaN(newStock) || newStock < 0) {
       alert("Stock must be a valid non-negative number.");
       return;
     }
-    dispatch(updateAdminProductStock({ id, stock: newStock }))
-    .unwrap()
-    .then(() => {
+    try {
+      await dispatch(updateAdminProductStock({ id, stock: newStock })).unwrap();
+      // Reset editing state
       setEditingStockId(null);
       setStockValue("");
-    })
-    .catch((err) => {
+      // Refresh the product list
+      await dispatch(fetchAdminProducts({ page, size }));
+    } catch (err) {
       alert(
         typeof err === "string"
           ? err
           : err?.message || "Failed to update stock. Please try again."
       );
-    });
+    }
   };
 
   // Debug log to check product data structure
@@ -202,7 +204,7 @@ export default function Products() {
                     </div>
                   )}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">{product.category}</td>
+                <td className="px-6 py-4 whitespace-nowrap">Laptop</td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   {product.imageUrl ? (
                     <img
@@ -220,8 +222,8 @@ export default function Products() {
                   <div className="flex items-center gap-2">
                     <Circle
                       className={`w-3 h-3 ${product.isActive
-                          ? "fill-green-500 text-green-500"
-                          : "fill-gray-300 text-gray-300"
+                        ? "fill-green-500 text-green-500"
+                        : "fill-gray-300 text-gray-300"
                         }`}
                     />
                     <span className={`text-sm ${product.isActive ? "text-green-700" : "text-gray-500"

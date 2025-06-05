@@ -41,7 +41,8 @@ function CartPage() {
       try {
         await dispatch(updateCartQuantityAsync({ id: itemId, quantity: newQuantity })).unwrap();
       } catch (error) {
-        console.error('Failed to update quantity:', error);
+        const errorMessage = error?.errors ? Object.values(error.errors)[0] : error;
+        alert(errorMessage);
       }
     } else {
       dispatch(updateQuantity({ id: itemId, quantity: newQuantity }));

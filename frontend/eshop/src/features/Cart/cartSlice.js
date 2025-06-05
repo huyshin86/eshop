@@ -34,11 +34,17 @@ export const addToCartAsync = createAsyncThunk(
           quantity: 1
         })
       });
-      if (!response.ok) throw new Error('Failed to add item to cart');
       const result = await response.json();
+      if (!response.ok) {
+        return rejectWithValue({
+          message: response.status === 403
+            ? "You don't have permission to perform this action"
+            : Object.values(result.errors)[0] || 'Failed to add item to cart'
+        });
+      }
       return result.data; // Return the updated cart data
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({ errors: { error: error.message } });
     }
   }
 );
@@ -51,11 +57,14 @@ export const updateCartQuantityAsync = createAsyncThunk(
         method: 'PUT',
         credentials: 'include'
       });
-      if (!response.ok) throw new Error('Failed to update cart');
       const result = await response.json();
+      if (!response.ok) {
+        const errorMessage = Object.values(result.errors)[0];
+        return rejectWithValue(errorMessage);
+      }
       return result.data; // Return the updated cart data
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({ errors: { error: error.message } });
     }
   }
 );
@@ -72,7 +81,7 @@ export const removeFromCartAsync = createAsyncThunk(
       const result = await response.json();
       return result.data; // Return the updated cart data
     } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue({ errors: { error: error.message } });
     }
   }
 );
@@ -355,5 +364,5 @@ const cartSlice = createSlice({
   }
 });
 
-export const { addToCart, removeFromCart, updateQuantity, clearCart, clearError,  } = cartSlice.actions;
+export const { addToCart, removeFromCart, updateQuantity, clearCart, clearError, } = cartSlice.actions;
 export default cartSlice.reducer;
